@@ -5,16 +5,16 @@
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" />
             </column>
-            <column name="group" type="varchar(255)">
+            <column name="grp" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
-            <column name="artifact" type="varchar(255)">
+            <column name="art" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
-            <column name="version" type="varchar(255)">
+            <column name="ver" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
-            <column name="classifier" type="varchar(255)">
+            <column name="cls" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
         </createTable>

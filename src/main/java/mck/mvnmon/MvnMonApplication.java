@@ -5,6 +5,7 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import mck.mvnmon.cmd.CrawlCommand;
 import mck.mvnmon.cmd.ScheduleCommand;
 
 public class MvnMonApplication extends Application<MvnMonConfiguration> {
@@ -19,7 +20,8 @@ public class MvnMonApplication extends Application<MvnMonConfiguration> {
 
   @Override
   public void initialize(Bootstrap<MvnMonConfiguration> bootstrap) {
-    bootstrap.addCommand(new ScheduleCommand(this));
+    bootstrap.addCommand(new ScheduleCommand());
+    bootstrap.addCommand(new CrawlCommand(this));
 
     bootstrap.addBundle(
         new MigrationsBundle<MvnMonConfiguration>() {
