@@ -14,6 +14,7 @@ import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import mck.mvnmon.api.MavenId;
+import mck.mvnmon.sql.MavenIdDao;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,7 +71,7 @@ public class MvnMonDaoTest {
 
   @Test
   public void scan() {
-    var dao = jdbi.onDemand(MvnMonDao.class);
+    var dao = jdbi.onDemand(MavenIdDao.class);
     var mavenId = new MavenId("group", "artifact", "version", "classifier");
     long id = dao.insert(mavenId);
     var res = dao.scan(100, 0);
@@ -80,7 +81,7 @@ public class MvnMonDaoTest {
 
   @Test
   public void insertAndGet() {
-    var dao = jdbi.onDemand(MvnMonDao.class);
+    var dao = jdbi.onDemand(MavenIdDao.class);
     var mavenId = new MavenId("group", "artifact", "version", "classifier");
     long id = dao.insert(mavenId);
     assertThat(dao.get("group", "artifact")).isPresent().get().isEqualTo(mavenId.withId(id));
@@ -90,7 +91,7 @@ public class MvnMonDaoTest {
 
   @Test
   public void update() {
-    var dao = jdbi.onDemand(MvnMonDao.class);
+    var dao = jdbi.onDemand(MavenIdDao.class);
     var mavenId = new MavenId("group", "artifact", "version", "classifier");
     long id = dao.insert(mavenId);
     mavenId = mavenId.withId(id).withNewVersion("newVersion");

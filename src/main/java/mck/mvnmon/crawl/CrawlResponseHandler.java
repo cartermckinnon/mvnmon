@@ -5,7 +5,7 @@ import io.nats.client.Connection;
 import java.util.function.BiFunction;
 import lombok.extern.slf4j.Slf4j;
 import mck.mvnmon.api.MavenId;
-import mck.mvnmon.ipc.Subjects;
+import mck.mvnmon.nats.Subjects;
 import org.asynchttpclient.Response;
 
 /**

@@ -3,7 +3,7 @@ package mck.mvnmon.apiserver;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
 import mck.mvnmon.MvnMonConfiguration;
-import mck.mvnmon.cmd.ExtendedServerCommand;
+import mck.mvnmon.command.ExtendedServerCommand;
 
 public class ApiServerCommand extends ExtendedServerCommand<MvnMonConfiguration> {
 

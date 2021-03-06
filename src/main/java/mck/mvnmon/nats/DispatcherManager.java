@@ -1,4 +1,4 @@
-package mck.mvnmon.ipc;
+package mck.mvnmon.nats;
 
 import io.dropwizard.lifecycle.Managed;
 import io.nats.client.Dispatcher;

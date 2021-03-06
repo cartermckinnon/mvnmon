@@ -1,4 +1,4 @@
-package mck.mvnmon.ipc;
+package mck.mvnmon.nats;
 
 import io.dropwizard.setup.Environment;
 import io.nats.client.Connection;

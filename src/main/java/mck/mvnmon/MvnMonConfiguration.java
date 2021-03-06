@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import mck.mvnmon.crawl.CrawlConfiguration;
-import mck.mvnmon.ipc.NatsFactory;
+import mck.mvnmon.nats.NatsFactory;
 import mck.mvnmon.schedule.ScheduleConfiguration;
 import mck.mvnmon.update.UpdateConfiguration;
 import org.jdbi.v3.core.Jdbi;

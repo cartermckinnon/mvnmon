@@ -3,9 +3,9 @@ package mck.mvnmon.update;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
 import mck.mvnmon.MvnMonConfiguration;
-import mck.mvnmon.cmd.ExtendedServerCommand;
-import mck.mvnmon.ipc.DispatcherManager;
-import mck.mvnmon.ipc.Subjects;
+import mck.mvnmon.command.ExtendedServerCommand;
+import mck.mvnmon.nats.DispatcherManager;
+import mck.mvnmon.nats.Subjects;
 import mck.mvnmon.sink.SqlMavenIdSink;
 import mck.mvnmon.util.CloseableManager;
 

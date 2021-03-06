@@ -1,4 +1,4 @@
-package mck.mvnmon.db;
+package mck.mvnmon.sql;
 
 import java.util.Collection;
 import java.util.List;
@@ -12,7 +12,7 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.jdbi.v3.sqlobject.statement.UseRowMapper;
 
-public interface MvnMonDao {
+public interface MavenIdDao {
 
   /**
    * Insert a MavenId.

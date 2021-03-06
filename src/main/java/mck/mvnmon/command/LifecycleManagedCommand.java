@@ -1,4 +1,4 @@
-package mck.mvnmon.cmd;
+package mck.mvnmon.command;
 
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;

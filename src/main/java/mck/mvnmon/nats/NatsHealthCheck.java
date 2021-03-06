@@ -1,4 +1,4 @@
-package mck.mvnmon.ipc;
+package mck.mvnmon.nats;
 
 import com.codahale.metrics.health.HealthCheck;
 import io.nats.client.Connection;

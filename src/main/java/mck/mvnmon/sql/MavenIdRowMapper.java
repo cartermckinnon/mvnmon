@@ -1,4 +1,4 @@
-package mck.mvnmon.db;
+package mck.mvnmon.sql;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

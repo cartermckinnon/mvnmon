@@ -1,4 +1,4 @@
-package mck.mvnmon.db;
+package mck.mvnmon.sql;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.jdbi3.InstrumentedSqlLogger;

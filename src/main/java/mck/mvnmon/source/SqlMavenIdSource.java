@@ -5,13 +5,13 @@ import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import mck.mvnmon.api.MavenId;
-import mck.mvnmon.db.MvnMonDao;
+import mck.mvnmon.sql.MavenIdDao;
 import org.jdbi.v3.core.Jdbi;
 
 /**
  * SQL-database-backed source of MavenId-s.
  *
- * @see MvnMonDao
+ * @see MavenIdDao
  */
 public class SqlMavenIdSource implements MavenIdSource {
 
@@ -25,18 +25,18 @@ public class SqlMavenIdSource implements MavenIdSource {
 
   @Override
   public Iterator<MavenId> get() {
-    return new MavenIdIterator(jdbi.onDemand(MvnMonDao.class), batchSize);
+    return new MavenIdIterator(jdbi.onDemand(MavenIdDao.class), batchSize);
   }
 
   private static class MavenIdIterator implements Iterator<MavenId> {
 
-    private final MvnMonDao dao;
+    private final MavenIdDao dao;
     private final int batchSize;
     private final Queue<MavenId> queue;
     private boolean finished;
     private long cursor;
 
-    private MavenIdIterator(MvnMonDao dao, int batchSize) {
+    private MavenIdIterator(MavenIdDao dao, int batchSize) {
       this.dao = dao;
       this.batchSize = batchSize;
       this.queue = new LinkedList<>();

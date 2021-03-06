@@ -10,7 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import lombok.extern.slf4j.Slf4j;
 import mck.mvnmon.api.MavenId;
-import mck.mvnmon.db.MvnMonDao;
+import mck.mvnmon.sql.MavenIdDao;
 import org.jdbi.v3.core.Jdbi;
 
 @Slf4j
@@ -45,7 +45,7 @@ public class SqlMavenIdSink implements MavenIdSink {
     if (queue.isEmpty()) {
       return;
     }
-    var dao = jdbi.onDemand(MvnMonDao.class);
+    var dao = jdbi.onDemand(MavenIdDao.class);
     List<MavenId> batch = new ArrayList<>(Math.min(batchSize, queue.size()));
     MavenId mavenId;
     for (int i = 0; i < batchSize; i++) {

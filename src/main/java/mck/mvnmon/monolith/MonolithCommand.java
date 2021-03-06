@@ -3,7 +3,7 @@ package mck.mvnmon.monolith;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
 import mck.mvnmon.MvnMonConfiguration;
-import mck.mvnmon.cmd.ExtendedServerCommand;
+import mck.mvnmon.command.ExtendedServerCommand;
 
 public class MonolithCommand extends ExtendedServerCommand<MvnMonConfiguration> {
 

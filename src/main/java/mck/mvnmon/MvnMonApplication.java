@@ -6,7 +6,7 @@ import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import mck.mvnmon.apiserver.ApiServerCommand;
-import mck.mvnmon.cmd.CheckConfigurationCommand;
+import mck.mvnmon.command.CheckConfigurationCommand;
 import mck.mvnmon.crawl.CrawlCommand;
 import mck.mvnmon.schedule.ScheduleCommand;
 import mck.mvnmon.update.UpdateCommand;
