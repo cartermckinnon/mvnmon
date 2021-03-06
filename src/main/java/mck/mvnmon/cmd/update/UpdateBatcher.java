@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import mck.mvnmon.api.MavenId;
+import mck.mvnmon.db.MvnMonDao;
 import org.jdbi.v3.core.Jdbi;
 
 public class UpdateBatcher implements Runnable {
@@ -25,7 +26,11 @@ public class UpdateBatcher implements Runnable {
 
   @Override
   public void run() {
-    List<MavenId> batch = new ArrayList<>(batchSize);
+    if (queue.isEmpty()) {
+      return;
+    }
+    var dao = jdbi.onDemand(MvnMonDao.class);
+    List<MavenId> batch = new ArrayList<>(Math.min(batchSize, queue.size()));
     MavenId mavenId;
     for (int i = 0; i < batchSize; i++) {
       mavenId = queue.poll();
@@ -34,7 +39,7 @@ public class UpdateBatcher implements Runnable {
       }
       batch.add(mavenId);
     }
-    if (!batch.isEmpty()) {}
+    dao.update(batch);
   }
 
   public int queueSize() {

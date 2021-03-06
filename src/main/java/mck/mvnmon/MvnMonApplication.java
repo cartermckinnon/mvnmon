@@ -7,6 +7,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import lombok.extern.slf4j.Slf4j;
 import mck.mvnmon.cmd.CheckConfigurationCommand;
+import mck.mvnmon.cmd.apiserver.ApiServerCommand;
 import mck.mvnmon.cmd.crawl.CrawlCommand;
 import mck.mvnmon.cmd.schedule.ScheduleCommand;
 import mck.mvnmon.cmd.update.UpdateCommand;
@@ -27,6 +28,7 @@ public class MvnMonApplication extends Application<MvnMonConfiguration> {
     bootstrap.addCommand(new ScheduleCommand(this));
     bootstrap.addCommand(new CrawlCommand(this));
     bootstrap.addCommand(new UpdateCommand(this));
+    bootstrap.addCommand(new ApiServerCommand(this));
 
     bootstrap.addBundle(
         new MigrationsBundle<MvnMonConfiguration>() {

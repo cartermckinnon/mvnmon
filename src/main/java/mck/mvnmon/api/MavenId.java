@@ -37,6 +37,10 @@ public class MavenId {
     return new MavenId(id, group, artifact, version, "");
   }
 
+  public MavenId withId(long id) {
+    return new MavenId(id, group, artifact, version, classifier);
+  }
+
   @Override
   public String toString() {
     var s = new StringBuilder();

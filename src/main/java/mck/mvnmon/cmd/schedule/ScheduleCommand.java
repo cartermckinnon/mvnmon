@@ -32,7 +32,7 @@ public class ScheduleCommand extends LifecycleManagedCommand<MvnMonConfiguration
 
     final long start = System.currentTimeMillis();
     while (true) {
-      results = dao.get(100, cursor);
+      results = dao.scan(100, cursor);
       if (results.isEmpty()) {
         break; // table is empty or the previous batch was the end of the table
       }

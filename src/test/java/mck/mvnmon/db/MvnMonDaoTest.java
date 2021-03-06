@@ -1,5 +1,8 @@
 package mck.mvnmon.db;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.jdbi3.JdbiFactory;
 import io.dropwizard.setup.Environment;
@@ -66,15 +69,36 @@ public class MvnMonDaoTest {
   }
 
   @Test
-  public void get() {
+  public void scan() {
     var dao = jdbi.onDemand(MvnMonDao.class);
-    var res = dao.get(100, 0);
+    var mavenId = new MavenId("group", "artifact", "version", "classifier");
+    long id = dao.insert(mavenId);
+    var res = dao.scan(100, 0);
+    assertThat(res).hasSize(1);
+    assertThat(res.get(0)).isEqualTo(mavenId.withId(id));
   }
 
   @Test
-  public void insert() {
+  public void insertAndGet() {
     var dao = jdbi.onDemand(MvnMonDao.class);
-    var id = new MavenId("group", "artifact", "version", "classifier");
-    dao.insert(id);
+    var mavenId = new MavenId("group", "artifact", "version", "classifier");
+    long id = dao.insert(mavenId);
+    assertThat(dao.get("group", "artifact")).isPresent().get().isEqualTo(mavenId.withId(id));
+    // shouldn't be able to insert the same group + artifact twice
+    assertThrows(Exception.class, () -> dao.insert(mavenId));
+  }
+
+  @Test
+  public void update() {
+    var dao = jdbi.onDemand(MvnMonDao.class);
+    var mavenId = new MavenId("group", "artifact", "version", "classifier");
+    long id = dao.insert(mavenId);
+    mavenId = mavenId.withId(id).withNewVersion("newVersion");
+    dao.update(mavenId);
+    assertThat(dao.get("group", "artifact"))
+        .isPresent()
+        .get()
+        .extracting(mid -> mid.getVersion())
+        .isEqualTo("newVersion");
   }
 }

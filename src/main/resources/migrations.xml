@@ -3,13 +3,13 @@
     <changeSet id="1" author="Carter McKinnon">
         <createTable tableName="mvnmon_ids">
             <column name="id" type="bigint" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false" />
+                <constraints nullable="false" />
             </column>
             <column name="grp" type="varchar(255)">
-                <constraints nullable="false" />
+                <constraints primaryKey="true" nullable="false" />
             </column>
             <column name="art" type="varchar(255)">
-                <constraints nullable="false" />
+                <constraints primaryKey="true" nullable="false" />
             </column>
             <column name="ver" type="varchar(255)">
                 <constraints nullable="false" />
