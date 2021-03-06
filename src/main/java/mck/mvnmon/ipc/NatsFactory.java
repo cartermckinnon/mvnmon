@@ -26,6 +26,7 @@ public class NatsFactory {
   public Connection build(Environment e) throws Exception {
     var nats = build();
     e.lifecycle().manage(new NatsManager(nats));
+    e.healthChecks().register("nats", new NatsHealthCheck(nats));
     return nats;
   }
 }

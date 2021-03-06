@@ -11,6 +11,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import mck.mvnmon.cmd.schedule.ScheduleConfiguration;
+import mck.mvnmon.cmd.update.UpdateConfiguration;
 import mck.mvnmon.ipc.NatsFactory;
 import org.jdbi.v3.core.Jdbi;
 
@@ -28,6 +30,16 @@ public class MvnMonConfiguration extends Configuration {
   @NotNull
   @JsonProperty("nats")
   private NatsFactory nats = new NatsFactory();
+
+  @Valid
+  @NotNull
+  @JsonProperty("update")
+  private UpdateConfiguration update = new UpdateConfiguration();
+
+  @Valid
+  @NotNull
+  @JsonProperty("schedule")
+  private ScheduleConfiguration schedule = new ScheduleConfiguration();
 
   public Jdbi buildJdbi(Environment e) {
     var factory = new JdbiFactory();

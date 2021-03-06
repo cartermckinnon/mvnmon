@@ -19,17 +19,17 @@ public class NatsManager implements Managed {
 
   @Override
   public void stop() {
-    LOG.error("draining...");
+    LOG.warn("draining...");
     try {
       c.drain(Duration.ZERO);
     } catch (Exception e) {
-      e.printStackTrace();
+      LOG.error("failed to drain!", e);
     }
-    LOG.error("closing...");
+    LOG.warn("closing...");
     try {
       c.close();
     } catch (Exception e) {
-      e.printStackTrace();
+      LOG.error("failed to close!", e);
     }
   }
 }

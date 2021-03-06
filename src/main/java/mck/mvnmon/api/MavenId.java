@@ -24,6 +24,19 @@ public class MavenId {
     this.classifier = classifier;
   }
 
+  public MavenId withNewVersion(String version) {
+    int classifierStart = version.indexOf("-");
+    if (classifierStart > 0) {
+      return new MavenId(
+          id,
+          group,
+          artifact,
+          version.substring(0, classifierStart),
+          version.substring(classifierStart + 1));
+    }
+    return new MavenId(id, group, artifact, version, "");
+  }
+
   @Override
   public String toString() {
     var s = new StringBuilder();
