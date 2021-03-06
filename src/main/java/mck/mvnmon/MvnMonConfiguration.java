@@ -11,9 +11,10 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import mck.mvnmon.cmd.schedule.ScheduleConfiguration;
-import mck.mvnmon.cmd.update.UpdateConfiguration;
+import mck.mvnmon.crawl.CrawlConfiguration;
 import mck.mvnmon.ipc.NatsFactory;
+import mck.mvnmon.schedule.ScheduleConfiguration;
+import mck.mvnmon.update.UpdateConfiguration;
 import org.jdbi.v3.core.Jdbi;
 
 @Getter
@@ -21,6 +22,12 @@ import org.jdbi.v3.core.Jdbi;
 @ToString
 @EqualsAndHashCode(callSuper = true)
 public class MvnMonConfiguration extends Configuration {
+
+  public MvnMonConfiguration() {
+    this.db.setDriverClass("org.postgres.Driver");
+    this.db.setUrl("jdbc:postgresql://localhost:5432/");
+  }
+
   @Valid
   @NotNull
   @JsonProperty("db")
@@ -40,6 +47,11 @@ public class MvnMonConfiguration extends Configuration {
   @NotNull
   @JsonProperty("schedule")
   private ScheduleConfiguration schedule = new ScheduleConfiguration();
+
+  @Valid
+  @NotNull
+  @JsonProperty("crawl")
+  private CrawlConfiguration crawl = new CrawlConfiguration();
 
   public Jdbi buildJdbi(Environment e) {
     var factory = new JdbiFactory();

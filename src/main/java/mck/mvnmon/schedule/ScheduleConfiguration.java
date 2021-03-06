@@ -1,6 +1,5 @@
-package mck.mvnmon.cmd.update;
+package mck.mvnmon.schedule;
 
-import io.dropwizard.util.Duration;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +9,6 @@ import lombok.ToString;
 @Setter
 @ToString
 @EqualsAndHashCode
-public class UpdateConfiguration {
+public class ScheduleConfiguration {
   private int batchSize = 100;
-  private Duration interval = Duration.seconds(10);
 }

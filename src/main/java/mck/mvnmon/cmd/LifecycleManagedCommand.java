@@ -6,7 +6,6 @@ import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.setup.Environment;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.argparse4j.inf.Namespace;
-import org.eclipse.jetty.util.component.ContainerLifeCycle;
 
 /**
  * A command that provides end-of-life lifecycle management for objects registered on an {@link
@@ -16,11 +15,8 @@ import org.eclipse.jetty.util.component.ContainerLifeCycle;
 public abstract class LifecycleManagedCommand<T extends Configuration>
     extends EnvironmentCommand<T> {
 
-  private final ContainerLifeCycle containerLifeCycle;
-
   public LifecycleManagedCommand(Application<T> application, String name, String description) {
     super(application, name, description);
-    containerLifeCycle = new ContainerLifeCycle();
   }
 
   @Override

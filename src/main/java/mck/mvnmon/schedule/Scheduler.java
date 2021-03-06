@@ -1,30 +1,29 @@
-package mck.mvnmon.cmd.schedule;
+package mck.mvnmon.schedule;
 
-import io.dropwizard.Application;
-import io.dropwizard.setup.Environment;
+import io.nats.client.Connection;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import mck.mvnmon.MvnMonConfiguration;
 import mck.mvnmon.api.MavenId;
-import mck.mvnmon.cmd.LifecycleManagedCommand;
 import mck.mvnmon.db.MvnMonDao;
 import mck.mvnmon.ipc.Subjects;
-import net.sourceforge.argparse4j.inf.Namespace;
+import org.jdbi.v3.core.Jdbi;
 
 @Slf4j
-public class ScheduleCommand extends LifecycleManagedCommand<MvnMonConfiguration> {
+public class Scheduler implements Runnable {
 
-  public ScheduleCommand(Application<MvnMonConfiguration> application) {
-    super(application, "schedule", "Queue all Maven artifacts for a version check.");
+  private final ScheduleConfiguration configuration;
+  private final Jdbi jdbi;
+  private final Connection nats;
+
+  public Scheduler(ScheduleConfiguration configuration, Jdbi jdbi, Connection nats) {
+    this.configuration = configuration;
+    this.jdbi = jdbi;
+    this.nats = nats;
   }
 
   @Override
-  protected void runManaged(
-      Environment environment, Namespace namespace, MvnMonConfiguration configuration)
-      throws Exception {
-    var jdbi = configuration.buildJdbi(environment);
+  public void run() {
     var dao = jdbi.onDemand(MvnMonDao.class);
-    var nats = configuration.getNats().build(environment);
 
     List<MavenId> results;
     long cursor = 0;
@@ -40,7 +39,7 @@ public class ScheduleCommand extends LifecycleManagedCommand<MvnMonConfiguration
         nats.publish(Subjects.SCHEDULED, result.toBytes());
       }
       n += results.size();
-      if (results.size() < configuration.getSchedule().getBatchSize()) {
+      if (results.size() < configuration.getBatchSize()) {
         break; // we reached the end of the table
       }
     }

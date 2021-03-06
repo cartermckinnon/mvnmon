@@ -1,20 +1,17 @@
-package mck.mvnmon.cmd.crawl;
+package mck.mvnmon.crawl;
 
 import io.nats.client.Message;
 import io.nats.client.MessageHandler;
-import java.nio.charset.StandardCharsets;
-import lombok.extern.slf4j.Slf4j;
 import mck.mvnmon.api.MavenId;
 import org.asynchttpclient.AsyncHttpClient;
 
 /** Receives scheduled MavenId-s and initiates asynchronous lookups of their latest versions. */
-@Slf4j
-public class CrawlRequestHandler implements MessageHandler {
+public class CrawlMessageHandler implements MessageHandler {
 
   private final AsyncHttpClient httpClient;
   private final CrawlResponseListenerFactory listenerFactory;
 
-  public CrawlRequestHandler(
+  public CrawlMessageHandler(
       AsyncHttpClient httpClient, CrawlResponseListenerFactory listenerFactory) {
     this.httpClient = httpClient;
     this.listenerFactory = listenerFactory;
@@ -22,15 +19,16 @@ public class CrawlRequestHandler implements MessageHandler {
 
   @Override
   public void onMessage(Message msg) throws InterruptedException {
-    LOG.info("received message: '{}'", new String(msg.getData(), StandardCharsets.UTF_8));
     MavenId mavenId = MavenId.parse(msg.getData());
     String url = buildUrl(mavenId);
+    // this will block if the max concurrent flights has been reached
+    var listener = listenerFactory.build(mavenId);
     httpClient
         .prepareGet(url)
         .addHeader("User-Agent", "mvnmon")
         .execute()
         .toCompletableFuture()
-        .handleAsync(listenerFactory.build(mavenId), listenerFactory.getExecutor());
+        .handleAsync(listener, listenerFactory.getExecutor());
   }
 
   public static final String buildUrl(MavenId mavenId) {

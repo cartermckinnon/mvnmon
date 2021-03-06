@@ -1,5 +1,9 @@
 # Architecture
 
+`mvnmon` is a handful of programs packaged into a single binary. The programs
+communicate with each other via
+[`**nats-server**`](https://github.com/nats-io/nats-server).
+
 ```
             ┌───────────────────┐
             │                   │
@@ -29,8 +33,6 @@
 └───────────────────┘  └───────────────────┘
 ```
 
-`mvnmon` is implemented as the following components:
-
 - **MavenIdProvider**
   - Source of Maven ID's (`group:artifact:version`) can be a local file (such as
     YAML or POM), a file at a remote URL (such as GitHub), or a database (such
@@ -44,11 +46,14 @@
     choice of orchestration.
 - **Crawler**
   - Downloads the latest version of the Maven ID's. This component uses fully
-    asynchronous I/O, can so can handle many concurrent downloads. However, you
-    may need to scale it to
+    asynchronous I/O, so can handle many concurrent downloads. However, you may
+    need to run multiple instances (such as via Kubernetes'
+    `HorizontalPodAutoscaler`).
 - **Updater**
   - If a newer version is available, updates the MavenIdProvider (such as
     opening a pull request, modifying a local file, or saving to a database).
+    Similarly to the Crawler, you may need to run multiple instances.
 - **Alerter**
   - If a newer version is available, send a notification (such as an email, SMS,
-    or Slack).
+    or Slack). Like the two previous components, you may need to scale the
+    Alerter.

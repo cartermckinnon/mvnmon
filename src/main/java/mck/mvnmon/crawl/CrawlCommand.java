@@ -1,4 +1,4 @@
-package mck.mvnmon.cmd.crawl;
+package mck.mvnmon.crawl;
 
 import static org.asynchttpclient.Dsl.*;
 
@@ -22,13 +22,15 @@ public class CrawlCommand extends ExtendedServerCommand<MvnMonConfiguration> {
 
     // this should be registered on the environment before the http client,
     // so that it is shut down *after* the client is drained.
-    var executor = environment.lifecycle().executorService("response-listener-%d").build();
+    var executor = environment.lifecycle().executorService("crawl-response-listener-%d").build();
 
     var httpClient = asyncHttpClient();
     environment.lifecycle().manage(new CloseableManager(httpClient));
 
-    var responseListenerFactory = new CrawlResponseListenerFactory(executor, nats);
-    var requestHandler = new CrawlRequestHandler(httpClient, responseListenerFactory);
+    var responseListenerFactory =
+        new CrawlResponseListenerFactory(
+            executor, nats, configuration.getCrawl().getMaxConcurrentRequests());
+    var requestHandler = new CrawlMessageHandler(httpClient, responseListenerFactory);
 
     var dispatcher = nats.createDispatcher(requestHandler);
     dispatcher.subscribe(Subjects.SCHEDULED, "crawl");

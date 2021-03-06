@@ -1,10 +1,9 @@
-package mck.mvnmon.cmd.apiserver;
+package mck.mvnmon.apiserver;
 
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
 import mck.mvnmon.MvnMonConfiguration;
 import mck.mvnmon.cmd.ExtendedServerCommand;
-import mck.mvnmon.rest.MavenIdResource;
 
 public class ApiServerCommand extends ExtendedServerCommand<MvnMonConfiguration> {
 

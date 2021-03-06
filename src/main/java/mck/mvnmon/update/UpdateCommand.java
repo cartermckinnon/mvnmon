@@ -1,12 +1,13 @@
-package mck.mvnmon.cmd.update;
+package mck.mvnmon.update;
 
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
-import java.util.concurrent.TimeUnit;
 import mck.mvnmon.MvnMonConfiguration;
 import mck.mvnmon.cmd.ExtendedServerCommand;
 import mck.mvnmon.ipc.DispatcherManager;
 import mck.mvnmon.ipc.Subjects;
+import mck.mvnmon.sink.SqlMavenIdSink;
+import mck.mvnmon.util.CloseableManager;
 
 public class UpdateCommand extends ExtendedServerCommand<MvnMonConfiguration> {
 
@@ -21,16 +22,14 @@ public class UpdateCommand extends ExtendedServerCommand<MvnMonConfiguration> {
     // so that the nats connection is closed before this executor is shut down
     var executor = environment.lifecycle().scheduledExecutorService("update-batcher-%d").build();
     var nats = configuration.getNats().build(environment);
-    var updateBatcher = new UpdateBatcher(jdbi, configuration.getUpdate().getBatchSize());
-    executor.scheduleWithFixedDelay(
-        updateBatcher,
-        configuration.getUpdate().getInterval().toMilliseconds(),
-        configuration.getUpdate().getInterval().toMilliseconds(),
-        TimeUnit.MILLISECONDS);
-    environment
-        .lifecycle()
-        .manage(new UpdateBatcherManager(updateBatcher, configuration.getUpdate().getInterval()));
-    var dispatcher = nats.createDispatcher(new UpdateMessageHandler(updateBatcher));
+    var sink =
+        new SqlMavenIdSink(
+            jdbi,
+            configuration.getUpdate().getBatchSize(),
+            configuration.getUpdate().getInterval(),
+            executor);
+    environment.lifecycle().manage(new CloseableManager(sink));
+    var dispatcher = nats.createDispatcher(new UpdateMessageHandler(sink));
     dispatcher.subscribe(Subjects.CRAWLED, "update");
     environment.lifecycle().manage(new DispatcherManager(dispatcher));
   }

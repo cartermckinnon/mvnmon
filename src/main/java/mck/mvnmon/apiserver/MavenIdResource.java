@@ -1,4 +1,4 @@
-package mck.mvnmon.rest;
+package mck.mvnmon.apiserver;
 
 import java.util.Optional;
 import javax.validation.constraints.NotBlank;
