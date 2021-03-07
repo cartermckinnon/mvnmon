@@ -1,4 +1,4 @@
-package mck.mvnmon.db;
+package mck.mvnmon.sql;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,7 +14,6 @@ import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import mck.mvnmon.api.MavenId;
-import mck.mvnmon.sql.MavenIdDao;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +25,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
-public class MvnMonDaoTest {
+public class MavenIdDaoTest {
   @Container
   public GenericContainer postgres =
       new GenericContainer(DockerImageName.parse("postgres:latest"))
@@ -55,7 +54,7 @@ public class MvnMonDaoTest {
     dataSourceFactory.setDriverClass(Driver.class.getName());
     dataSourceFactory.setUser("user");
     dataSourceFactory.setPassword("password");
-    var e = new Environment(MvnMonDaoTest.class.getName());
+    var e = new Environment(MavenIdDaoTest.class.getName());
     jdbi = new JdbiFactory().build(e, dataSourceFactory, "test");
   }
 
@@ -72,7 +71,7 @@ public class MvnMonDaoTest {
   @Test
   public void scan() {
     var dao = jdbi.onDemand(MavenIdDao.class);
-    var mavenId = new MavenId("group", "artifact", "version", "classifier");
+    var mavenId = new MavenId("group", "artifact", "version");
     long id = dao.insert(mavenId);
     var res = dao.scan(100, 0);
     assertThat(res).hasSize(1);
@@ -82,7 +81,7 @@ public class MvnMonDaoTest {
   @Test
   public void insertAndGet() {
     var dao = jdbi.onDemand(MavenIdDao.class);
-    var mavenId = new MavenId("group", "artifact", "version", "classifier");
+    var mavenId = new MavenId("group", "artifact", "version");
     long id = dao.insert(mavenId);
     assertThat(dao.get("group", "artifact")).isPresent().get().isEqualTo(mavenId.withId(id));
     // shouldn't be able to insert the same group + artifact twice
@@ -92,7 +91,7 @@ public class MvnMonDaoTest {
   @Test
   public void update() {
     var dao = jdbi.onDemand(MavenIdDao.class);
-    var mavenId = new MavenId("group", "artifact", "version", "classifier");
+    var mavenId = new MavenId("group", "artifact", "version");
     long id = dao.insert(mavenId);
     mavenId = mavenId.withId(id).withNewVersion("newVersion");
     dao.update(mavenId);

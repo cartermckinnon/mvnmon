@@ -1,7 +1,7 @@
 package mck.mvnmon.crawl;
 
-import com.jayway.jsonpath.JsonPath;
 import io.nats.client.Connection;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import lombok.extern.slf4j.Slf4j;
 import mck.mvnmon.api.MavenId;
@@ -33,24 +33,10 @@ public class CrawlResponseHandler implements BiFunction<Response, Throwable, Voi
         // report an error with a nats message?
       } else if (r.getStatusCode() == 200) {
         String json = r.getResponseBody();
-        Object versionElement = JsonPath.read(json, "$.response.docs[0].latestVersion");
-        if (versionElement instanceof String) {
-          String version = (String) versionElement;
-          if (!version.equals(mavenId.getVersion())) {
-            LOG.info("received new version={} for mavenId={}", versionElement, mavenId);
-            nats.publish(Subjects.CRAWLED, mavenId.withNewVersion(version).toBytes());
-          } else {
-            LOG.debug("received version={} for mavenId={}", versionElement, mavenId);
-          }
-        } else if (versionElement != null) {
-          LOG.warn(
-              "unexpected type={} when parsing version={} for mavenId={} in response={}",
-              versionElement.getClass().getName(),
-              versionElement,
-              mavenId,
-              json);
-        } else {
-          LOG.warn("no version for mavenId={} in response={}", mavenId, json);
+        Optional<String> newVersion = CrawlUtils.parseNewVersionFromResponse(json, mavenId);
+        if (newVersion.isPresent()) {
+          LOG.info("received new version={} for mavenId={}", newVersion.get(), mavenId);
+          nats.publish(Subjects.CRAWLED, mavenId.withNewVersion(newVersion.get()).toBytes());
         }
       }
     } finally {

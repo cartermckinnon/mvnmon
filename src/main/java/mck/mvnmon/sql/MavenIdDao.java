@@ -20,9 +20,7 @@ public interface MavenIdDao {
    * @param mavenId to be inserted. The 'id' field will be ignored.
    * @return generated ID.
    */
-  @SqlUpdate(
-      "INSERT INTO mvnmon_ids (grp, art, ver, cls) VALUES (:group, :artifact, :version,"
-          + " :classifier)")
+  @SqlUpdate("INSERT INTO mvnmon_ids (grp, art, ver) VALUES (:group, :artifact, :version)")
   @GetGeneratedKeys
   public long insert(@BindFields MavenId mavenId);
 
@@ -51,8 +49,7 @@ public interface MavenIdDao {
   public List<MavenId> scan(@Bind("limit") int limit, @Bind("cursor") long cursor);
 
   public static final String UPDATE_QUERY =
-      "UPDATE mvnmon_ids SET grp = :group, art = :artifact, ver = :version, cls = :classifier"
-          + " WHERE id = :id";
+      "UPDATE mvnmon_ids SET grp = :group, art = :artifact, ver = :version" + " WHERE id = :id";
 
   @SqlUpdate(UPDATE_QUERY)
   public void update(@BindFields MavenId mavenId);

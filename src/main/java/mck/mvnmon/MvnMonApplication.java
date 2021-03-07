@@ -8,6 +8,8 @@ import io.dropwizard.setup.Environment;
 import mck.mvnmon.apiserver.ApiServerCommand;
 import mck.mvnmon.command.CheckConfigurationCommand;
 import mck.mvnmon.crawl.CrawlCommand;
+import mck.mvnmon.pom.PomDependenciesCommand;
+import mck.mvnmon.pom.PomUpdateDependenciesCommand;
 import mck.mvnmon.schedule.ScheduleCommand;
 import mck.mvnmon.update.UpdateCommand;
 
@@ -41,6 +43,8 @@ public class MvnMonApplication extends Application<MvnMonConfiguration> {
     // we do not add the 'server' command -- we will provide our own,
     // so that Application::run can always be a no-op
     bootstrap.addCommand(new CheckConfigurationCommand<>(this));
+    bootstrap.addCommand(new PomDependenciesCommand());
+    bootstrap.addCommand(new PomUpdateDependenciesCommand());
   }
 
   @Override

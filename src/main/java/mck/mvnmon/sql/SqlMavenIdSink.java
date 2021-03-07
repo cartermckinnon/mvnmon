@@ -20,7 +20,7 @@ public class SqlMavenIdSink implements MavenIdSink {
   private final Queue<MavenId> queue;
   private final int batchSize;
   private final Duration batchInterval;
-  private final ScheduledFuture future;
+  private final ScheduledFuture<?> future;
 
   public SqlMavenIdSink(
       Jdbi jdbi, int batchSize, Duration batchInterval, ScheduledExecutorService executor) {
@@ -58,6 +58,7 @@ public class SqlMavenIdSink implements MavenIdSink {
     dao.update(batch);
   }
 
+  /** Will block until all queued MavenId(s) are persisted to the database. */
   @Override
   public void close() throws IOException {
     while (!queue.isEmpty()) {

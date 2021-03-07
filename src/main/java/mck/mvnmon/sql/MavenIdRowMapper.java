@@ -12,10 +12,6 @@ public class MavenIdRowMapper implements RowMapper<MavenId> {
   public MavenId map(ResultSet rs, StatementContext ctx) throws SQLException {
     // none of these fields are (assumed to be) nullable in the table
     return new MavenId(
-        rs.getLong("id"),
-        rs.getString("grp"),
-        rs.getString("art"),
-        rs.getString(("ver")),
-        rs.getString("cls"));
+        rs.getLong("id"), rs.getString("grp"), rs.getString("art"), rs.getString("ver"));
   }
 }

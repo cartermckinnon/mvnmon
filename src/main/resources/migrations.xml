@@ -14,9 +14,6 @@
             <column name="ver" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
-            <column name="cls" type="varchar(255)">
-                <constraints nullable="false" />
-            </column>
         </createTable>
     </changeSet>
 </databaseChangeLog>

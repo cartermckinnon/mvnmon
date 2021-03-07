@@ -20,7 +20,7 @@ public class CrawlMessageHandler implements MessageHandler {
   @Override
   public void onMessage(Message msg) throws InterruptedException {
     MavenId mavenId = MavenId.parse(msg.getData());
-    String url = buildUrl(mavenId);
+    String url = CrawlUtils.buildUrl(mavenId);
     // this will block if the max concurrent flights has been reached
     var listener = listenerFactory.build(mavenId);
     httpClient
@@ -29,11 +29,5 @@ public class CrawlMessageHandler implements MessageHandler {
         .execute()
         .toCompletableFuture()
         .handleAsync(listener, listenerFactory.getExecutor());
-  }
-
-  public static final String buildUrl(MavenId mavenId) {
-    return String.format(
-        "https://search.maven.org/solrsearch/select?q=g:%s+AND+a:%s&start=0&rows=5",
-        mavenId.getGroup(), mavenId.getArtifact());
   }
 }
