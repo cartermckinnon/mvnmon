@@ -1,11 +1,11 @@
-package mck.mvnmon.source;
+package mck.mvnmon.sql;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import mck.mvnmon.api.MavenId;
-import mck.mvnmon.sql.MavenIdDao;
+import mck.mvnmon.source.MavenIdSource;
 import org.jdbi.v3.core.Jdbi;
 
 /**

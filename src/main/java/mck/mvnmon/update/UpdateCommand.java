@@ -6,7 +6,7 @@ import mck.mvnmon.MvnMonConfiguration;
 import mck.mvnmon.command.ExtendedServerCommand;
 import mck.mvnmon.nats.DispatcherManager;
 import mck.mvnmon.nats.Subjects;
-import mck.mvnmon.sink.SqlMavenIdSink;
+import mck.mvnmon.sql.SqlMavenIdSink;
 import mck.mvnmon.util.CloseableManager;
 
 public class UpdateCommand extends ExtendedServerCommand<MvnMonConfiguration> {

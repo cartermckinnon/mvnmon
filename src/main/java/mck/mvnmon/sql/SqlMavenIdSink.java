@@ -1,4 +1,4 @@
-package mck.mvnmon.sink;
+package mck.mvnmon.sql;
 
 import io.dropwizard.util.Duration;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import lombok.extern.slf4j.Slf4j;
 import mck.mvnmon.api.MavenId;
-import mck.mvnmon.sql.MavenIdDao;
+import mck.mvnmon.sink.MavenIdSink;
 import org.jdbi.v3.core.Jdbi;
 
 @Slf4j
