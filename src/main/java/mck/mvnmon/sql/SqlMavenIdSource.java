@@ -58,7 +58,7 @@ public class SqlMavenIdSource implements MavenIdSource {
       return queue.poll();
     }
 
-    public void getMore() {
+    private void getMore() {
       if (queue.isEmpty() || finished) {
         return;
       }
