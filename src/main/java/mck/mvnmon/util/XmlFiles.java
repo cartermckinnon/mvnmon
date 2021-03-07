@@ -1,5 +1,6 @@
 package mck.mvnmon.util;
 
+import de.pdark.decentxml.Attribute;
 import de.pdark.decentxml.Document;
 import de.pdark.decentxml.Element;
 import de.pdark.decentxml.XMLParser;
@@ -55,6 +56,31 @@ public enum XmlFiles {
     if (parentElement != null) {
       Element element = firstChild(parentElement, elementName);
       if (element != null) {
+        String textContent = element.getText();
+        if (textContent == null || !value.equals(textContent)) {
+          element.setText(value);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  public static boolean updateFirstChildIgnoringIfAttribute(
+      Element parentElement,
+      String elementName,
+      String value,
+      String attributeName,
+      String attributeValue) {
+    if (parentElement != null) {
+      Element element = firstChild(parentElement, elementName);
+      if (element != null) {
+        if (attributeName != null && attributeValue != null) {
+          Attribute attr = element.getAttribute(attributeName);
+          if (attr != null && attributeValue.equals(attr.getValue())) {
+            return false;
+          }
+        }
         String textContent = element.getText();
         if (textContent == null || !value.equals(textContent)) {
           element.setText(value);

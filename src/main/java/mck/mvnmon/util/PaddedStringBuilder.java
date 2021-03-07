@@ -1,5 +1,6 @@
 package mck.mvnmon.util;
 
+/** A StringBuilder capable of appending Strings padded with a given character. */
 public class PaddedStringBuilder {
   private final StringBuilder buf = new StringBuilder();
 

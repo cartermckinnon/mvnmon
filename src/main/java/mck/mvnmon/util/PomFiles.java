@@ -1,5 +1,6 @@
 package mck.mvnmon.util;
 
+import de.pdark.decentxml.Attribute;
 import de.pdark.decentxml.Document;
 import de.pdark.decentxml.Element;
 import java.util.Collection;
@@ -43,15 +44,9 @@ public enum PomFiles {
           String versionProperty = version.substring(2, version.length() - 1);
           String propertyVersion = properties.get(versionProperty);
           if (propertyVersion == null) {
-            throw new IllegalArgumentException(
-                "dependency group="
-                    + groupId
-                    + " artifact="
-                    + artifactId
-                    + " uses versionProperty="
-                    + versionProperty
-                    + " but that property is not defined in properties="
-                    + properties);
+            // property may have been marked with mvnmon="ignore"
+            // or there's a problem with the POM file, which is (respectfull) not our problem
+            continue;
           }
           version = propertyVersion;
         }
@@ -70,6 +65,10 @@ public enum PomFiles {
     }
     ;
     for (Element property : propertiesElement.getChildren()) {
+      Attribute ignore = property.getAttribute("mvnmon");
+      if (ignore != null && ignore.getValue().equals("ignore")) {
+        continue;
+      }
       properties.put(property.getName(), property.getText());
     }
     return properties;
@@ -85,6 +84,9 @@ public enum PomFiles {
     List<Element> dependencies = XmlFiles.findElementsWithName(rootElement, "dependency");
     boolean update = false;
     for (Element element : dependencies) {
+      if (MVNMON_IGNORE_COMMENT_PATTERN.matcher(element.toString()).find()) {
+        continue;
+      }
       String groupId = XmlFiles.firstChildTextContent(element, "groupId");
       String artifactId = XmlFiles.firstChildTextContent(element, "artifactId");
       Optional<MavenId> newVersion = newVersions.get(groupId, artifactId);
@@ -121,7 +123,8 @@ public enum PomFiles {
     for (var entry : propertyChanges.entrySet()) {
       String propertyName = entry.getKey();
       String propertyVersion = entry.getValue();
-      if (XmlFiles.updateFirstChild(properties, propertyName, propertyVersion)) {
+      if (XmlFiles.updateFirstChildIgnoringIfAttribute(
+          properties, propertyName, propertyVersion, "mvnmon", "ignore")) {
         update = true;
       }
     }

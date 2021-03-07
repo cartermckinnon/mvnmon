@@ -29,6 +29,8 @@ public class MvnMonApplication extends Application<MvnMonConfiguration> {
     bootstrap.addCommand(new CrawlCommand(this));
     bootstrap.addCommand(new UpdateCommand(this));
     bootstrap.addCommand(new ApiServerCommand(this));
+    bootstrap.addCommand(new PomDependenciesCommand());
+    bootstrap.addCommand(new PomUpdateDependenciesCommand());
     bootstrap.addBundle(
         new MigrationsBundle<MvnMonConfiguration>() {
           @Override
@@ -43,8 +45,6 @@ public class MvnMonApplication extends Application<MvnMonConfiguration> {
     // we do not add the 'server' command -- we will provide our own,
     // so that Application::run can always be a no-op
     bootstrap.addCommand(new CheckConfigurationCommand<>(this));
-    bootstrap.addCommand(new PomDependenciesCommand());
-    bootstrap.addCommand(new PomUpdateDependenciesCommand());
   }
 
   @Override
