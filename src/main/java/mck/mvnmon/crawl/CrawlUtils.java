@@ -4,8 +4,6 @@ import com.jayway.jsonpath.JsonPath;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 import liquibase.pro.packaged.i;
 import lombok.extern.slf4j.Slf4j;
@@ -55,43 +53,56 @@ public class CrawlUtils {
     if (latestVersions.isEmpty()) {
       return Optional.empty();
     }
-
     if (latestVersions.get(0).equals(mavenId.getVersion())) {
       // the current version is the latest version
       return Optional.empty();
     }
 
-    // use maven's version comparison to filter the candidates to those equal or newer
+    // use maven's version comparison to filter the candidates to those equal or newer.
     // we (potentially) leave the current version in the mix, to prevent undesirable
     // qualifier switches, such as from org.postgresql:postgresql 42.2.19 to 42.2.19.jre7
     ComparableVersion currentVersion = new ComparableVersion(mavenId.getVersion());
-    List<ComparableVersion> newerVersionsThanCurrent =
+    List<ComparableVersion> candidateVersions =
         latestVersions.stream()
             .map(ComparableVersion::new)
             .filter(v -> currentVersion.compareTo(v) <= 0)
             .collect(Collectors.toList());
 
-    switch (newerVersionsThanCurrent.size()) {
+    switch (candidateVersions.size()) {
       case 0:
         // this case should be covered by the equality check early-on,
         // but is possible (if artifacts are deleted, for example)
         // we don't do downgrades!
         return Optional.empty();
       case 1:
-        return Optional.of(newerVersionsThanCurrent.get(0).toString());
+        return Optional.of(candidateVersions.get(0).toString());
+      default:
+        // fall through
     }
 
     // calculate a score for each candidate that is its edit distance + its position
-    // in the list (to penalize earlier upload times)
-    SortedMap<Integer, ComparableVersion> distances = new TreeMap<>();
-    for (int i = 0; i < newerVersionsThanCurrent.size(); i++) {
-      ComparableVersion version = newerVersionsThanCurrent.get(i);
-      int distance =
-          LevenshteinDistance.getDefaultInstance().apply(mavenId.getVersion(), version.toString());
-      distances.put(distance + i, version);
+    // in the list (to penalize earlier upload times).
+    // the winning candidate is the one with the lowest score.
+    // any tie is broken by insertion order (i.e. upload time).
+    int minimumScore = Integer.MAX_VALUE;
+    ComparableVersion candidate = null;
+    for (int i = 0; i < candidateVersions.size(); i++) {
+      ComparableVersion currentCandidate = candidateVersions.get(i);
+      int editDistance =
+          LevenshteinDistance.getDefaultInstance()
+              .apply(mavenId.getVersion(), currentCandidate.toString());
+      int score = editDistance + i;
+      if (score < minimumScore) {
+        minimumScore = score;
+        candidate = currentCandidate;
+      }
+    }
+    if (candidate == null) {
+      // something has gone horribly wrong
+      throw new IllegalStateException(
+          "no candidate was chosen during the scoring process; this should never happen!");
     }
 
-    ComparableVersion candidate = distances.get(distances.firstKey());
     // we potentially left the current version in the mix, so need to check for it here.
     if (currentVersion.equals(candidate)) {
       return Optional.empty();
