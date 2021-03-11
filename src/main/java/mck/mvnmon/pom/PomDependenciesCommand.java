@@ -5,7 +5,7 @@ import io.dropwizard.cli.Command;
 import io.dropwizard.setup.Bootstrap;
 import java.net.URL;
 import java.util.Collection;
-import mck.mvnmon.api.MavenId;
+import mck.mvnmon.api.MavenDependency;
 import mck.mvnmon.util.PaddedStringBuilder;
 import mck.mvnmon.util.PomFiles;
 import mck.mvnmon.util.XmlFiles;
@@ -32,27 +32,28 @@ public class PomDependenciesCommand extends Command {
   public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
     URL url = (URL) namespace.get("url");
     Document doc = XmlFiles.parseXmlFile(url);
-    Collection<MavenId> mavenIds = PomFiles.getDependencies(doc);
-    int groupLen = 0, artifactLen = 0;
-    for (MavenId mavenId : mavenIds) {
-      groupLen = Math.max(groupLen, mavenId.getGroup().length());
-      artifactLen = Math.max(artifactLen, mavenId.getArtifact().length());
+    Collection<MavenDependency> dependencies = PomFiles.getDependencies(doc);
+    int groupLen = 7; // 'GROUPID'
+    int artifactLen = 10; // 'ARTIFACTID'
+    for (MavenDependency dependency : dependencies) {
+      groupLen = Math.max(groupLen, dependency.getGroupId().length());
+      artifactLen = Math.max(artifactLen, dependency.getArtifactId().length());
     }
     groupLen += 1;
     artifactLen += 1;
     String header =
         new PaddedStringBuilder()
-            .padWith("GROUP", ' ', groupLen)
-            .padWith("ARTIFACT", ' ', artifactLen)
+            .padWith("GROUPID", ' ', groupLen)
+            .padWith("ARTIFACTID", ' ', artifactLen)
             .append("VERSION")
             .toString();
     System.out.println(header);
-    for (MavenId mavenId : mavenIds) {
+    for (MavenDependency dependency : dependencies) {
       String line =
           new PaddedStringBuilder()
-              .padWith(mavenId.getGroup(), ' ', groupLen)
-              .padWith(mavenId.getArtifact(), ' ', artifactLen)
-              .append(mavenId.getVersion())
+              .padWith(dependency.getGroupId(), ' ', groupLen)
+              .padWith(dependency.getArtifactId(), ' ', artifactLen)
+              .append(dependency.getVersion())
               .toString();
       System.out.println(line);
     }

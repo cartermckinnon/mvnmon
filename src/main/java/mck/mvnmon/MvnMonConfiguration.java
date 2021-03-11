@@ -3,7 +3,6 @@ package mck.mvnmon;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
-import io.dropwizard.jdbi3.JdbiFactory;
 import io.dropwizard.setup.Environment;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -14,6 +13,7 @@ import lombok.ToString;
 import mck.mvnmon.crawl.CrawlConfiguration;
 import mck.mvnmon.nats.NatsFactory;
 import mck.mvnmon.schedule.ScheduleConfiguration;
+import mck.mvnmon.sql.PostgresJdbiFactory;
 import mck.mvnmon.update.UpdateConfiguration;
 import org.jdbi.v3.core.Jdbi;
 
@@ -54,7 +54,7 @@ public class MvnMonConfiguration extends Configuration {
   private CrawlConfiguration crawl = new CrawlConfiguration();
 
   public Jdbi buildJdbi(Environment e) {
-    var factory = new JdbiFactory();
+    var factory = new PostgresJdbiFactory();
     return factory.build(e, db, "db");
   }
 }

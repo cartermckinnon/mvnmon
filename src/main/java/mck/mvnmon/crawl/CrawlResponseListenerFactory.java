@@ -3,7 +3,7 @@ package mck.mvnmon.crawl;
 import io.nats.client.Connection;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
-import mck.mvnmon.api.MavenId;
+import mck.mvnmon.api.MavenArtifact;
 
 /** Builds CrawlResponseListeners and enforces a maximum on the number of concurrent requests. */
 public class CrawlResponseListenerFactory {
@@ -26,16 +26,16 @@ public class CrawlResponseListenerFactory {
    * Build a CrawlResponseHandler, blocking until a permit is available (i.e. the number of
    * concurrent requests is less than the maximum allowed).
    *
-   * @param mavenId
+   * @param mavenArtifact
    * @return new CrawlResponseHandler
    */
-  public CrawlResponseHandler build(MavenId mavenId) {
+  public CrawlResponseHandler build(MavenArtifact mavenArtifact) {
     try {
       requestsInFlight.acquire();
     } catch (InterruptedException e) {
       throw new RuntimeException(
           "failed to acquire a permit to create a crawl response handler!", e);
     }
-    return new CrawlResponseHandler(mavenId, nats).setCallback(requestsInFlight::release);
+    return new CrawlResponseHandler(mavenArtifact, nats).setCallback(requestsInFlight::release);
   }
 }

@@ -4,39 +4,39 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-import mck.mvnmon.api.MavenId;
-import mck.mvnmon.source.MavenIdSource;
+import mck.mvnmon.api.MavenArtifact;
+import mck.mvnmon.source.MavenArtifactSource;
 import org.jdbi.v3.core.Jdbi;
 
 /**
  * SQL-database-backed source of MavenId-s.
  *
- * @see MavenIdDao
+ * @see MavenArtifactDao
  */
-public class SqlMavenIdSource implements MavenIdSource {
+public class SqlMavenArtifactSource implements MavenArtifactSource {
 
   private final Jdbi jdbi;
   private final int batchSize;
 
-  public SqlMavenIdSource(Jdbi jdbi, int batchSize) {
+  public SqlMavenArtifactSource(Jdbi jdbi, int batchSize) {
     this.jdbi = jdbi;
     this.batchSize = batchSize;
   }
 
   @Override
-  public Iterator<MavenId> get() {
-    return new MavenIdIterator(jdbi.onDemand(MavenIdDao.class), batchSize);
+  public Iterator<MavenArtifact> get() {
+    return new MavenIdIterator(jdbi.onDemand(MavenArtifactDao.class), batchSize);
   }
 
-  private static class MavenIdIterator implements Iterator<MavenId> {
+  private static class MavenIdIterator implements Iterator<MavenArtifact> {
 
-    private final MavenIdDao dao;
+    private final MavenArtifactDao dao;
     private final int batchSize;
-    private final Queue<MavenId> queue;
+    private final Queue<MavenArtifact> queue;
     private boolean finished;
     private long cursor;
 
-    private MavenIdIterator(MavenIdDao dao, int batchSize) {
+    private MavenIdIterator(MavenArtifactDao dao, int batchSize) {
       this.dao = dao;
       this.batchSize = batchSize;
       this.queue = new LinkedList<>();
@@ -50,7 +50,7 @@ public class SqlMavenIdSource implements MavenIdSource {
     }
 
     @Override
-    public MavenId next() {
+    public MavenArtifact next() {
       if (queue.isEmpty()) {
         throw new NoSuchElementException(
             "there are no more maven id-s, you should be checking hashNext");

@@ -8,7 +8,9 @@ import java.io.FileWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import mck.mvnmon.api.MavenId;
+import java.util.List;
+import mck.mvnmon.api.MavenArtifactUpdate;
+import mck.mvnmon.api.MavenDependency;
 import mck.mvnmon.crawl.CrawlUtils;
 import mck.mvnmon.util.PaddedStringBuilder;
 import mck.mvnmon.util.PomFiles;
@@ -33,20 +35,26 @@ public class PomUpdateDependenciesCommand extends Command {
   public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
     File pomFile = (File) namespace.get("pomFilePath");
     Document doc = XmlFiles.parseXmlFile(pomFile);
-    Collection<MavenId> mavenIds = PomFiles.getDependencies(doc);
+    Collection<MavenDependency> dependencies = PomFiles.getDependencies(doc);
 
-    Collection<MavenId> newVersions = new ArrayList<>();
-    for (MavenId mavenId : mavenIds) {
-      String crawlUrl = CrawlUtils.buildUrl(mavenId);
+    Collection<MavenArtifactUpdate> updates = new ArrayList<>();
+    for (MavenDependency dependency : dependencies) {
+      String crawlUrl = CrawlUtils.buildUrl(dependency.getGroupId(), dependency.getArtifactId());
       byte[] response = new URL(crawlUrl).openStream().readAllBytes();
-      CrawlUtils.parseNewVersionFromResponse(response, mavenId)
+      List<String> latestVersions = CrawlUtils.parseLatestVersionsFromResponse(response);
+      CrawlUtils.getNewVersion(dependency.getVersion(), latestVersions)
           .ifPresent(
               newVersion -> {
-                newVersions.add(mavenId.withNewVersion(newVersion));
+                updates.add(
+                    new MavenArtifactUpdate(
+                        dependency.getGroupId(),
+                        dependency.getArtifactId(),
+                        dependency.getVersion(),
+                        newVersion));
               });
     }
 
-    if (PomFiles.updateDependencyVersions(doc, newVersions)) {
+    if (PomFiles.updateDependencyVersions(doc, updates)) {
       File backupPomFile = new File(pomFile, ".backup");
       File newPomFile = new File(pomFile.getAbsolutePath());
       pomFile.renameTo(backupPomFile);
@@ -55,37 +63,48 @@ public class PomUpdateDependenciesCommand extends Command {
       }
     }
 
-    if (newVersions.isEmpty()) {
+    if (updates.isEmpty()) {
       System.out.println("No dependencies updated");
       return;
     }
 
-    if (newVersions.size() == 1) {
+    if (updates.size() == 1) {
       System.out.println("Updated 1 dependency");
     } else {
-      System.out.println("Updated " + newVersions.size() + " dependencies");
+      System.out.println("Updated " + updates.size() + " dependencies");
     }
 
-    int groupLen = 0, artifactLen = 0;
-    for (MavenId mavenId : newVersions) {
-      groupLen = Math.max(groupLen, mavenId.getGroup().length());
-      artifactLen = Math.max(artifactLen, mavenId.getArtifact().length());
+    final String groupHeader = "GROUP ID";
+    final String artifactHeader = "ARTIFACT ID";
+    final String oldVersionHeader = "OLD VERSION";
+    final String newVersionHeader = "NEW VERSION";
+
+    int groupLen = groupHeader.length();
+    int artifactLen = artifactHeader.length();
+    int oldVersionLen = oldVersionHeader.length();
+    for (MavenArtifactUpdate update : updates) {
+      groupLen = Math.max(groupLen, update.getGroupId().length());
+      artifactLen = Math.max(artifactLen, update.getArtifactId().length());
+      oldVersionLen = Math.max(oldVersionLen, update.getCurrentVersion().length());
     }
     groupLen += 1;
     artifactLen += 1;
+    oldVersionLen += 1;
     String header =
         new PaddedStringBuilder()
-            .padWith("GROUP", ' ', groupLen)
-            .padWith("ARTIFACT", ' ', artifactLen)
-            .append("VERSION")
+            .padWith(groupHeader, ' ', groupLen)
+            .padWith(artifactHeader, ' ', artifactLen)
+            .padWith(oldVersionHeader, ' ', oldVersionLen)
+            .append(newVersionHeader)
             .toString();
     System.out.println(header);
-    for (MavenId mavenId : newVersions) {
+    for (MavenArtifactUpdate update : updates) {
       String line =
           new PaddedStringBuilder()
-              .padWith(mavenId.getGroup(), ' ', groupLen)
-              .padWith(mavenId.getArtifact(), ' ', artifactLen)
-              .append(mavenId.getVersion())
+              .padWith(update.getGroupId(), ' ', groupLen)
+              .padWith(update.getArtifactId(), ' ', artifactLen)
+              .padWith(update.getCurrentVersion(), ' ', oldVersionLen)
+              .append(update.getNewVersion())
               .toString();
       System.out.println(line);
     }

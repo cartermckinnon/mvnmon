@@ -14,6 +14,6 @@ public class ApiServerCommand extends ExtendedServerCommand<MvnMonConfiguration>
   @Override
   protected void run(Environment environment, MvnMonConfiguration configuration) throws Exception {
     var jdbi = configuration.buildJdbi(environment);
-    environment.jersey().register(new MavenIdResource(jdbi));
+    environment.jersey().register(new MavenArtifactResource(jdbi));
   }
 }

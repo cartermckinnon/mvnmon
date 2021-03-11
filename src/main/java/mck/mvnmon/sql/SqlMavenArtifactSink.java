@@ -9,20 +9,20 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import lombok.extern.slf4j.Slf4j;
-import mck.mvnmon.api.MavenId;
-import mck.mvnmon.sink.MavenIdSink;
+import mck.mvnmon.api.MavenArtifact;
+import mck.mvnmon.sink.MavenArtifactSink;
 import org.jdbi.v3.core.Jdbi;
 
 @Slf4j
-public class SqlMavenIdSink implements MavenIdSink {
+public class SqlMavenArtifactSink implements MavenArtifactSink {
 
   private final Jdbi jdbi;
-  private final Queue<MavenId> queue;
+  private final Queue<MavenArtifact> queue;
   private final int batchSize;
   private final Duration batchInterval;
   private final ScheduledFuture<?> future;
 
-  public SqlMavenIdSink(
+  public SqlMavenArtifactSink(
       Jdbi jdbi, int batchSize, Duration batchInterval, ScheduledExecutorService executor) {
     this.jdbi = jdbi;
     this.queue = new ConcurrentLinkedQueue<>();
@@ -37,7 +37,7 @@ public class SqlMavenIdSink implements MavenIdSink {
   }
 
   @Override
-  public void sink(MavenId mavenId) {
+  public void sink(MavenArtifact mavenId) {
     queue.add(mavenId);
   }
 
@@ -45,9 +45,9 @@ public class SqlMavenIdSink implements MavenIdSink {
     if (queue.isEmpty()) {
       return;
     }
-    var dao = jdbi.onDemand(MavenIdDao.class);
-    List<MavenId> batch = new ArrayList<>(Math.min(batchSize, queue.size()));
-    MavenId mavenId;
+    var dao = jdbi.onDemand(MavenArtifactDao.class);
+    List<MavenArtifact> batch = new ArrayList<>(Math.min(batchSize, queue.size()));
+    MavenArtifact mavenId;
     for (int i = 0; i < batchSize; i++) {
       mavenId = queue.poll();
       if (mavenId == null) {

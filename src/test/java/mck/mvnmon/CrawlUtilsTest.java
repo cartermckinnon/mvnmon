@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import mck.mvnmon.api.MavenId;
 import mck.mvnmon.crawl.CrawlUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -12,7 +11,7 @@ import org.junit.jupiter.api.TestFactory;
 public class CrawlUtilsTest {
   @Test
   public void getNewVersion_guava() {
-    MavenId mavenId = new MavenId("com.google.guava", "guava", "20.0-jre");
+    // from com.google.guava:guava
     List<String> latestVersions = new ArrayList<>();
     latestVersions.add("30.1-jre");
     latestVersions.add("30.1-android");
@@ -25,20 +24,19 @@ public class CrawlUtilsTest {
     latestVersions.add("28.1-jre");
     latestVersions.add("28.1-android");
 
-    var newVersion = CrawlUtils.getNewVersion(mavenId, latestVersions);
+    var newVersion = CrawlUtils.getNewVersion("20.0-jre", latestVersions);
     assertThat(newVersion).isPresent().get().isEqualTo("30.1-jre");
 
-    mavenId = mavenId.withNewVersion("28.2-jre");
-    newVersion = CrawlUtils.getNewVersion(mavenId, latestVersions);
+    newVersion = CrawlUtils.getNewVersion("28.2-jre", latestVersions);
     assertThat(newVersion).isPresent().get().isEqualTo("30.1-jre");
 
-    mavenId = mavenId.withNewVersion("30.0-android");
-    newVersion = CrawlUtils.getNewVersion(mavenId, latestVersions);
+    newVersion = CrawlUtils.getNewVersion("30.0-android", latestVersions);
     assertThat(newVersion).isPresent().get().isEqualTo("30.1-android");
   }
 
   @TestFactory
   public void getNewVersion_postgresql() {
+    // from org.postgresql:postgresql
     List<String> latestVersions = new ArrayList<>();
     latestVersions.add("42.2.19.jre7");
     latestVersions.add("42.2.19.jre6");
@@ -47,30 +45,25 @@ public class CrawlUtilsTest {
     latestVersions.add("42.2.18");
     latestVersions.add("42.2.18.jre6");
 
-    MavenId mavenId = new MavenId("org.postgresql", "postgresql", "42.2.18");
-    var newVersion = CrawlUtils.getNewVersion(mavenId, latestVersions);
+    var newVersion = CrawlUtils.getNewVersion("42.2.18", latestVersions);
     assertThat(newVersion).isPresent().get().isEqualTo("42.2.19");
 
-    mavenId = mavenId.withNewVersion("42.2.17");
-    newVersion = CrawlUtils.getNewVersion(mavenId, latestVersions);
+    newVersion = CrawlUtils.getNewVersion("42.2.17", latestVersions);
     assertThat(newVersion).isPresent().get().isEqualTo("42.2.19");
 
-    mavenId = mavenId.withNewVersion("42.2.18.jre7");
-    newVersion = CrawlUtils.getNewVersion(mavenId, latestVersions);
+    newVersion = CrawlUtils.getNewVersion("42.2.18.jre7", latestVersions);
     assertThat(newVersion).isPresent().get().isEqualTo("42.2.19.jre7");
 
-    mavenId = mavenId.withNewVersion("42.2.18.jre6");
-    newVersion = CrawlUtils.getNewVersion(mavenId, latestVersions);
+    newVersion = CrawlUtils.getNewVersion("42.2.18.jre6", latestVersions);
     assertThat(newVersion).isPresent().get().isEqualTo("42.2.19.jre6");
 
-    mavenId = mavenId.withNewVersion("42.2.19");
-    newVersion = CrawlUtils.getNewVersion(mavenId, latestVersions);
+    newVersion = CrawlUtils.getNewVersion("42.2.19", latestVersions);
     assertThat(newVersion).isEmpty();
   }
 
   @TestFactory
-  public void getNewVersion_junit() {
-    MavenId mavenId = new MavenId("org.junit.jupiter", "junit-jupiter-api", "5.7.1");
+  public void getNewVersion_junit_jupiter() {
+    // from org.junit.jupiter:junit-jupiter-api
     List<String> latestVersions = new ArrayList<>();
     latestVersions.add("5.8.0-M1");
     latestVersions.add("5.7.1");
@@ -79,15 +72,13 @@ public class CrawlUtilsTest {
     latestVersions.add("5.7.0-M1");
     latestVersions.add("5.6.2");
 
-    var newVersion = CrawlUtils.getNewVersion(mavenId, latestVersions);
+    var newVersion = CrawlUtils.getNewVersion("5.7.1", latestVersions);
     assertThat(newVersion).isPresent().get().isEqualTo("5.8.0-M1");
 
-    mavenId = mavenId.withNewVersion("5.6.2");
-    newVersion = CrawlUtils.getNewVersion(mavenId, latestVersions);
+    newVersion = CrawlUtils.getNewVersion("5.6.2", latestVersions);
     assertThat(newVersion).isPresent().get().isEqualTo("5.8.0-M1");
 
-    mavenId = mavenId.withNewVersion("4.0.0");
-    newVersion = CrawlUtils.getNewVersion(mavenId, latestVersions);
+    newVersion = CrawlUtils.getNewVersion("4.0.0", latestVersions);
     assertThat(newVersion).isPresent().get().isEqualTo("5.8.0-M1");
   }
 }

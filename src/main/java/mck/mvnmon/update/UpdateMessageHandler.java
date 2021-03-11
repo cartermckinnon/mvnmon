@@ -2,20 +2,20 @@ package mck.mvnmon.update;
 
 import io.nats.client.Message;
 import io.nats.client.MessageHandler;
-import mck.mvnmon.api.MavenId;
-import mck.mvnmon.sink.MavenIdSink;
+import mck.mvnmon.api.MavenArtifactWithId;
+import mck.mvnmon.sink.MavenArtifactSink;
 
 public class UpdateMessageHandler implements MessageHandler {
 
-  private final MavenIdSink sink;
+  private final MavenArtifactSink sink;
 
-  public UpdateMessageHandler(MavenIdSink sink) {
+  public UpdateMessageHandler(MavenArtifactSink sink) {
     this.sink = sink;
   }
 
   @Override
   public void onMessage(Message msg) {
-    MavenId mavenId = MavenId.parse(msg.getData());
+    var mavenId = MavenArtifactWithId.parse(msg.getData());
     sink.sink(mavenId);
   }
 }
