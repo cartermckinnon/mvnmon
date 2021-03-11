@@ -1,5 +1,7 @@
 package mck.mvnmon.api;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.jackson.Jackson;
 import java.util.Arrays;
@@ -21,7 +23,11 @@ public class MavenArtifact {
     this(groupId, artifactId, Arrays.asList(versions));
   }
 
-  public MavenArtifact(String groupId, String artifactId, List<String> versions) {
+  @JsonCreator
+  public MavenArtifact(
+      @JsonProperty("groupId") String groupId,
+      @JsonProperty("artifactId") String artifactId,
+      @JsonProperty("versions") List<String> versions) {
     this.groupId = groupId;
     this.artifactId = artifactId;
     this.versions = versions;

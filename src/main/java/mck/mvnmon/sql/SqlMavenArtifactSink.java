@@ -56,6 +56,7 @@ public class SqlMavenArtifactSink implements MavenArtifactSink {
       batch.add(mavenId);
     }
     dao.update(batch);
+    LOG.info("updated batch={}", batch);
   }
 
   /** Will block until all queued MavenId(s) are persisted to the database. */

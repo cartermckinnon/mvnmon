@@ -16,6 +16,7 @@ import mck.mvnmon.schedule.ScheduleConfiguration;
 import mck.mvnmon.sql.PostgresJdbiFactory;
 import mck.mvnmon.update.UpdateConfiguration;
 import org.jdbi.v3.core.Jdbi;
+import org.postgresql.Driver;
 
 @Getter
 @Setter
@@ -24,7 +25,7 @@ import org.jdbi.v3.core.Jdbi;
 public class MvnMonConfiguration extends Configuration {
 
   public MvnMonConfiguration() {
-    this.db.setDriverClass("org.postgres.Driver");
+    this.db.setDriverClass(Driver.class.getName());
     this.db.setUrl("jdbc:postgresql://localhost:5432/");
   }
 
