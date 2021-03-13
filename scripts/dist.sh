@@ -6,15 +6,20 @@ cd $(dirname $0)
 cd ..
 
 rm -rf dist/
-rm -rf .tmp/
 
-cp -R target/maven-jlink/classifiers/runtime/ .tmp/
-cp -R doc/ .tmp/doc
+VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+DIST="mvnmon-$VERSION"
 
-mkdir dist/
+mkdir -p dist/$DIST/lib
+mkdir -p dist/$DIST/extlib
+mkdir -p dist/$DIST/bin
 
-zip -r dist/dist.zip .tmp/
+# assemble
+cp -R target/mvnmon*.jar dist/$DIST/lib/
+cp -R target/lib/* dist/$DIST/extlib/
+cp -R doc/ dist/$DIST/doc
+cp src/main/bin/mvnmon dist/$DIST/bin/
 
-tar -pczf dist/dist.tar.gz .tmp/
-
-rm -rf .tmp/
+# archive
+zip -r dist/$DIST.zip dist/$DIST
+tar -pczf dist/$DIST.tar.gz dist/$DIST

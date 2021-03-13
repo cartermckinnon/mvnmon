@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+set -e
+
+MVNMON_HOME=$(cd "$(dirname "$0")/.."; pwd)
+
+java \
+  --enable-preview \
+  -cp $MVNMON_HOME/extlib/*:$MVNMON_HOME/lib/* \
+  mck.mvnmon.MvnMonApplication "$@"
