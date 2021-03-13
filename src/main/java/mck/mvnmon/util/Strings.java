@@ -1,29 +1,31 @@
 package mck.mvnmon.util;
 
-import java.util.Comparator;
-
+/** Utilities for Strings. */
 public enum Strings {
   INSTANCE;
 
-  private static final String DIGIT_AND_DECIMAL_REGEX = "[^\\d.]";
-
-  public static Comparator<String> createLengthComparator() {
-    return Comparator.comparingInt(String::length);
-  }
-
-  public static Comparator<String> createNaturalOrderComparator() {
-    return Comparator.comparingDouble(Strings::parseStringToNumber);
-  }
-
-  private static double parseStringToNumber(String input) {
-    String digitsOnly = input.replaceAll(DIGIT_AND_DECIMAL_REGEX, "");
-    if (digitsOnly.isEmpty()) {
-      return 0;
+  /**
+   * @param s a string.
+   * @param c a character to look for.
+   * @param n the number of character occurrances to look for.
+   * @return the index of the n-th occurrance of c, or -1 if there are less than n occurrances of c.
+   */
+  public static int nthIndexOf(String s, char c, int n) {
+    if (s == null) {
+      throw new NullPointerException("s cannot be null");
     }
-    try {
-      return Double.parseDouble(digitsOnly);
-    } catch (NumberFormatException nfe) {
-      return 0;
+    if (n <= 0) {
+      throw new IllegalArgumentException("n must be greater than zero: " + n);
     }
+    if (s.isEmpty()) {
+      return -1;
+    }
+    char[] chars = s.toCharArray();
+    for (int i = 0; i < chars.length; i++) {
+      if (chars[i] == c && --n == 0) {
+        return i;
+      }
+    }
+    return -1;
   }
 }

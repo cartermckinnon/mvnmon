@@ -15,6 +15,7 @@ public class ApiServerCommand extends ExtendedServerCommand<MvnMonConfiguration>
   protected void run(Environment environment, MvnMonConfiguration configuration) throws Exception {
     var jdbi = configuration.buildJdbi(environment);
     environment.jersey().register(new MavenArtifactResource(jdbi));
-    environment.jersey().register(new WebhookResource());
+    var nats = configuration.getNats().build(environment);
+    environment.jersey().register(new WebhookResource(nats));
   }
 }
