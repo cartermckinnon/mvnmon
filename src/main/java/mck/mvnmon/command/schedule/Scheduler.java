@@ -1,4 +1,4 @@
-package mck.mvnmon.schedule;
+package mck.mvnmon.command.schedule;
 
 import io.nats.client.Connection;
 import java.util.List;

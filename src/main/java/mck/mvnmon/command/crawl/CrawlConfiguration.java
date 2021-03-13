@@ -1,4 +1,4 @@
-package mck.mvnmon.crawl;
+package mck.mvnmon.command.crawl;
 
 import javax.validation.constraints.Min;
 import lombok.EqualsAndHashCode;

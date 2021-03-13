@@ -7,11 +7,11 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import mck.mvnmon.apiserver.ApiServerCommand;
 import mck.mvnmon.command.CheckConfigurationCommand;
-import mck.mvnmon.crawl.CrawlCommand;
-import mck.mvnmon.pom.PomDependenciesCommand;
-import mck.mvnmon.pom.PomUpdateDependenciesCommand;
-import mck.mvnmon.schedule.ScheduleCommand;
-import mck.mvnmon.update.UpdateCommand;
+import mck.mvnmon.command.crawl.CrawlCommand;
+import mck.mvnmon.command.pom.PomDependenciesCommand;
+import mck.mvnmon.command.pom.PomUpdateDependenciesCommand;
+import mck.mvnmon.command.schedule.ScheduleCommand;
+import mck.mvnmon.command.update.UpdateCommand;
 
 public class MvnMonApplication extends Application<MvnMonConfiguration> {
   public static final void main(String[] args) throws Exception {

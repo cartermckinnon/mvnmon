@@ -1,4 +1,4 @@
-package mck.mvnmon.pom;
+package mck.mvnmon.command.pom;
 
 import de.pdark.decentxml.Document;
 import io.dropwizard.cli.Command;

@@ -1,4 +1,4 @@
-package mck.mvnmon.crawl;
+package mck.mvnmon.command.crawl;
 
 import static org.asynchttpclient.Dsl.*;
 

@@ -1,4 +1,4 @@
-package mck.mvnmon.update;
+package mck.mvnmon.command.update;
 
 import io.dropwizard.util.Duration;
 import io.nats.client.Message;

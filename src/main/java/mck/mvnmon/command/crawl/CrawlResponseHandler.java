@@ -1,4 +1,4 @@
-package mck.mvnmon.crawl;
+package mck.mvnmon.command.crawl;
 
 import io.nats.client.Connection;
 import java.util.List;

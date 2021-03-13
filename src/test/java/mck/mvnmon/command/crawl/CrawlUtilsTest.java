@@ -1,10 +1,9 @@
-package mck.mvnmon;
+package mck.mvnmon.command.crawl;
 
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import mck.mvnmon.crawl.CrawlUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 

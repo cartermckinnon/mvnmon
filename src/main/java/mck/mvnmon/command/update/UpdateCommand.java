@@ -1,4 +1,4 @@
-package mck.mvnmon.update;
+package mck.mvnmon.command.update;
 
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;

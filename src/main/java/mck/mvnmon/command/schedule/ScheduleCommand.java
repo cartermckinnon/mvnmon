@@ -1,4 +1,4 @@
-package mck.mvnmon.schedule;
+package mck.mvnmon.command.schedule;
 
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
