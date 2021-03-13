@@ -1,4 +1,4 @@
-package mck.mvnmon.command.crawl;
+package mck.mvnmon.cmd.crawl;
 
 import mck.mvnmon.cmd.crawl.CrawlUtils;
 import static org.assertj.core.api.Assertions.*;
