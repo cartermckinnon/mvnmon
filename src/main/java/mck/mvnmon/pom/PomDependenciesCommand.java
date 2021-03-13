@@ -5,7 +5,7 @@ import io.dropwizard.cli.Command;
 import io.dropwizard.setup.Bootstrap;
 import java.net.URL;
 import java.util.Collection;
-import mck.mvnmon.api.MavenDependency;
+import mck.mvnmon.api.maven.Dependency;
 import mck.mvnmon.util.PaddedStringBuilder;
 import mck.mvnmon.util.PomFiles;
 import mck.mvnmon.util.XmlFiles;
@@ -32,10 +32,10 @@ public class PomDependenciesCommand extends Command {
   public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
     URL url = (URL) namespace.get("url");
     Document doc = XmlFiles.parseXmlFile(url);
-    Collection<MavenDependency> dependencies = PomFiles.getDependencies(doc);
+    Collection<Dependency> dependencies = PomFiles.getDependencies(doc);
     int groupLen = 7; // 'GROUPID'
     int artifactLen = 10; // 'ARTIFACTID'
-    for (MavenDependency dependency : dependencies) {
+    for (Dependency dependency : dependencies) {
       groupLen = Math.max(groupLen, dependency.getGroupId().length());
       artifactLen = Math.max(artifactLen, dependency.getArtifactId().length());
     }
@@ -48,7 +48,7 @@ public class PomDependenciesCommand extends Command {
             .append("VERSION")
             .toString();
     System.out.println(header);
-    for (MavenDependency dependency : dependencies) {
+    for (Dependency dependency : dependencies) {
       String line =
           new PaddedStringBuilder()
               .padWith(dependency.getGroupId(), ' ', groupLen)

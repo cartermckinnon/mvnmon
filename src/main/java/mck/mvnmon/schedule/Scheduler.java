@@ -3,10 +3,9 @@ package mck.mvnmon.schedule;
 import io.nats.client.Connection;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import mck.mvnmon.api.MavenArtifact;
-import mck.mvnmon.api.MavenArtifactWithId;
+import mck.mvnmon.api.maven.ArtifactWithId;
 import mck.mvnmon.nats.Subjects;
-import mck.mvnmon.sql.MavenArtifactDao;
+import mck.mvnmon.sql.ArtifactDao;
 import org.jdbi.v3.core.Jdbi;
 
 @Slf4j
@@ -24,9 +23,9 @@ public class Scheduler implements Runnable {
 
   @Override
   public void run() {
-    var dao = jdbi.onDemand(MavenArtifactDao.class);
+    var dao = jdbi.onDemand(ArtifactDao.class);
 
-    List<MavenArtifactWithId> results;
+    List<ArtifactWithId> results;
     long cursor = 0;
     long n = 0;
 
@@ -36,7 +35,7 @@ public class Scheduler implements Runnable {
       if (results.isEmpty()) {
         break; // table is empty or the previous batch was the end of the table
       }
-      for (MavenArtifactWithId result : results) {
+      for (ArtifactWithId result : results) {
         nats.publish(Subjects.SCHEDULED, result.toBytes());
       }
       n += results.size();

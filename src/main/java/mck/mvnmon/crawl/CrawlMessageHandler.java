@@ -2,10 +2,10 @@ package mck.mvnmon.crawl;
 
 import io.nats.client.Message;
 import io.nats.client.MessageHandler;
-import mck.mvnmon.api.MavenArtifact;
+import mck.mvnmon.api.maven.Artifact;
 import org.asynchttpclient.AsyncHttpClient;
 
-/** Receives scheduled MavenId-s and initiates asynchronous lookups of their latest versions. */
+/** Receives scheduled artifacts and initiates asynchronous lookups of their latest versions. */
 public class CrawlMessageHandler implements MessageHandler {
 
   private final AsyncHttpClient httpClient;
@@ -19,7 +19,7 @@ public class CrawlMessageHandler implements MessageHandler {
 
   @Override
   public void onMessage(Message msg) throws InterruptedException {
-    MavenArtifact artifact = MavenArtifact.parse(msg.getData());
+    Artifact artifact = Artifact.parse(msg.getData());
     String url = CrawlUtils.buildUrl(artifact.getGroupId(), artifact.getArtifactId());
     // this will block if the max concurrent flights has been reached
     var listener = listenerFactory.build(artifact);

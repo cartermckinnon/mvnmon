@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
-import mck.mvnmon.api.MavenArtifactUpdate;
-import mck.mvnmon.api.MavenDependency;
+import mck.mvnmon.api.maven.ArtifactUpdate;
+import mck.mvnmon.api.maven.Dependency;
 
 @Slf4j
 public enum PomFiles {
@@ -21,14 +21,14 @@ public enum PomFiles {
   public static final Pattern MVNMON_IGNORE_COMMENT_PATTERN =
       Pattern.compile("<!--\s+mvnmon:ignore\s+-->");
 
-  public static Collection<MavenDependency> getDependencies(Document doc) {
+  public static Collection<Dependency> getDependencies(Document doc) {
     Element rootElement = doc.getRootElement();
     List<Element> dependencies = XmlFiles.findElementsWithName(rootElement, "dependency");
     if (dependencies.isEmpty()) {
       return Collections.emptyList();
     }
     Map<String, String> properties = getProperties(doc);
-    Map<String, MavenDependency> mavenDependencies = new HashMap<>();
+    Map<String, Dependency> mavenDependencies = new HashMap<>();
     for (Element dependency : dependencies) {
       if (MVNMON_IGNORE_COMMENT_PATTERN.matcher(dependency.toString()).find()) {
         continue;
@@ -51,7 +51,7 @@ public enum PomFiles {
           }
           version = propertyVersion;
         }
-        mavenDependencies.put(groupArtifact, new MavenDependency(groupId, artifactId, version));
+        mavenDependencies.put(groupArtifact, new Dependency(groupId, artifactId, version));
       }
     }
     return mavenDependencies.values();
@@ -76,7 +76,7 @@ public enum PomFiles {
   }
 
   public static boolean updateDependencyVersions(
-      Document doc, Collection<MavenArtifactUpdate> artifactUpdates) {
+      Document doc, Collection<ArtifactUpdate> artifactUpdates) {
     if (artifactUpdates.isEmpty()) {
       return false;
     }
@@ -91,7 +91,7 @@ public enum PomFiles {
       }
       String groupId = XmlFiles.firstChildTextContent(dependency, "groupId");
       String artifactId = XmlFiles.firstChildTextContent(dependency, "artifactId");
-      Optional<MavenArtifactUpdate> artifactUpdate = updateTable.get(groupId, artifactId);
+      Optional<ArtifactUpdate> artifactUpdate = updateTable.get(groupId, artifactId);
       if (artifactUpdate.isPresent()) {
         String version = XmlFiles.firstChildTextContent(dependency, "version");
         if (version != null) {
@@ -135,21 +135,21 @@ public enum PomFiles {
   }
 
   private static class GroupArtifactLookupTable {
-    private final Map<String, MavenArtifactUpdate> map;
+    private final Map<String, ArtifactUpdate> map;
 
-    private GroupArtifactLookupTable(Collection<MavenArtifactUpdate> artifactUpdates) {
-      map = new HashMap<String, MavenArtifactUpdate>(artifactUpdates.size());
+    private GroupArtifactLookupTable(Collection<ArtifactUpdate> artifactUpdates) {
+      map = new HashMap<String, ArtifactUpdate>(artifactUpdates.size());
       for (var artifactUpdate : artifactUpdates) {
         String groupArtifact =
             String.join(":", artifactUpdate.getGroupId(), artifactUpdate.getArtifactId());
-        MavenArtifactUpdate conflict = map.putIfAbsent(groupArtifact, artifactUpdate);
+        ArtifactUpdate conflict = map.putIfAbsent(groupArtifact, artifactUpdate);
         if (conflict != null) {
           throw new IllegalArgumentException("conflict on groupArtifact='" + groupArtifact + "'");
         }
       }
     }
 
-    private Optional<MavenArtifactUpdate> get(String group, String artifact) {
+    private Optional<ArtifactUpdate> get(String group, String artifact) {
       var res = map.get(String.join(":", group, artifact));
       return Optional.ofNullable(res);
     }

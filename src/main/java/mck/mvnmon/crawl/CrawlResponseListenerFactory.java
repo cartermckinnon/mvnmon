@@ -3,7 +3,7 @@ package mck.mvnmon.crawl;
 import io.nats.client.Connection;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
-import mck.mvnmon.api.MavenArtifact;
+import mck.mvnmon.api.maven.Artifact;
 
 /** Builds CrawlResponseListeners and enforces a maximum on the number of concurrent requests. */
 public class CrawlResponseListenerFactory {
@@ -29,7 +29,7 @@ public class CrawlResponseListenerFactory {
    * @param mavenArtifact
    * @return new CrawlResponseHandler
    */
-  public CrawlResponseHandler build(MavenArtifact mavenArtifact) {
+  public CrawlResponseHandler build(Artifact mavenArtifact) {
     try {
       requestsInFlight.acquire();
     } catch (InterruptedException e) {

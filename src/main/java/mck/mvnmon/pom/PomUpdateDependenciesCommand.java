@@ -9,8 +9,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import mck.mvnmon.api.MavenArtifactUpdate;
-import mck.mvnmon.api.MavenDependency;
+import mck.mvnmon.api.maven.ArtifactUpdate;
+import mck.mvnmon.api.maven.Dependency;
 import mck.mvnmon.crawl.CrawlUtils;
 import mck.mvnmon.util.PaddedStringBuilder;
 import mck.mvnmon.util.PomFiles;
@@ -35,10 +35,10 @@ public class PomUpdateDependenciesCommand extends Command {
   public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
     File pomFile = (File) namespace.get("pomFilePath");
     Document doc = XmlFiles.parseXmlFile(pomFile);
-    Collection<MavenDependency> dependencies = PomFiles.getDependencies(doc);
+    Collection<Dependency> dependencies = PomFiles.getDependencies(doc);
 
-    Collection<MavenArtifactUpdate> updates = new ArrayList<>();
-    for (MavenDependency dependency : dependencies) {
+    Collection<ArtifactUpdate> updates = new ArrayList<>();
+    for (Dependency dependency : dependencies) {
       String crawlUrl = CrawlUtils.buildUrl(dependency.getGroupId(), dependency.getArtifactId());
       byte[] response = new URL(crawlUrl).openStream().readAllBytes();
       List<String> latestVersions = CrawlUtils.parseLatestVersionsFromResponse(response);
@@ -46,7 +46,7 @@ public class PomUpdateDependenciesCommand extends Command {
           .ifPresent(
               newVersion -> {
                 updates.add(
-                    new MavenArtifactUpdate(
+                    new ArtifactUpdate(
                         dependency.getGroupId(),
                         dependency.getArtifactId(),
                         dependency.getVersion(),
@@ -82,7 +82,7 @@ public class PomUpdateDependenciesCommand extends Command {
     int groupLen = groupHeader.length();
     int artifactLen = artifactHeader.length();
     int oldVersionLen = oldVersionHeader.length();
-    for (MavenArtifactUpdate update : updates) {
+    for (ArtifactUpdate update : updates) {
       groupLen = Math.max(groupLen, update.getGroupId().length());
       artifactLen = Math.max(artifactLen, update.getArtifactId().length());
       oldVersionLen = Math.max(oldVersionLen, update.getCurrentVersion().length());
@@ -98,7 +98,7 @@ public class PomUpdateDependenciesCommand extends Command {
             .append(newVersionHeader)
             .toString();
     System.out.println(header);
-    for (MavenArtifactUpdate update : updates) {
+    for (ArtifactUpdate update : updates) {
       String line =
           new PaddedStringBuilder()
               .padWith(update.getGroupId(), ' ', groupLen)

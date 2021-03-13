@@ -11,8 +11,8 @@ import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import mck.mvnmon.api.MavenArtifact;
-import mck.mvnmon.api.MavenArtifactWithId;
+import mck.mvnmon.api.maven.Artifact;
+import mck.mvnmon.api.maven.ArtifactWithId;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +24,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
-public class MavenArtifactDaoTest {
+public class ArtifactDaoTest {
   @Container
   public GenericContainer postgres =
       new GenericContainer(DockerImageName.parse("postgres:latest"))
@@ -53,7 +53,7 @@ public class MavenArtifactDaoTest {
     dataSourceFactory.setDriverClass(Driver.class.getName());
     dataSourceFactory.setUser("user");
     dataSourceFactory.setPassword("password");
-    var e = new Environment(MavenArtifactDaoTest.class.getName());
+    var e = new Environment(ArtifactDaoTest.class.getName());
     jdbi = new PostgresJdbiFactory().build(e, dataSourceFactory, "test");
   }
 
@@ -69,12 +69,12 @@ public class MavenArtifactDaoTest {
 
   @Test
   public void scan() {
-    var dao = jdbi.onDemand(MavenArtifactDao.class);
-    var artifact = new MavenArtifact("group", "artifact", "version");
+    var dao = jdbi.onDemand(ArtifactDao.class);
+    var artifact = new Artifact("group", "artifact", "version");
     dao.insert(artifact);
     var res = dao.scan(100, 0);
     assertThat(res).hasSize(1);
-    MavenArtifactWithId artifactWithId = res.get(0);
+    ArtifactWithId artifactWithId = res.get(0);
     // id's must start at 1 for initial cursor to work correctly
     assertThat(artifactWithId.getId()).isEqualTo(1);
     assertThat(artifactWithId.getGroupId()).isEqualTo("group");
@@ -84,12 +84,12 @@ public class MavenArtifactDaoTest {
 
   @Test
   public void insertAndGet() {
-    var dao = jdbi.onDemand(MavenArtifactDao.class);
-    var artifact = new MavenArtifact("group", "artifact", "version");
+    var dao = jdbi.onDemand(ArtifactDao.class);
+    var artifact = new Artifact("group", "artifact", "version");
     dao.insert(artifact);
     assertThat(dao.get("group", "artifact")).isPresent().get().isEqualTo(artifact);
     // shouldn't be able to insert the same group + artifact twice
-    artifact = new MavenArtifact("group", "artifact", "otherVersion");
+    artifact = new Artifact("group", "artifact", "otherVersion");
     dao.insert(artifact);
     // version should not have changed since first insert
     assertThat(dao.get("group", "artifact"))
@@ -102,8 +102,8 @@ public class MavenArtifactDaoTest {
 
   @Test
   public void update() {
-    var dao = jdbi.onDemand(MavenArtifactDao.class);
-    var artifact = new MavenArtifact("group", "artifact", "version");
+    var dao = jdbi.onDemand(ArtifactDao.class);
+    var artifact = new Artifact("group", "artifact", "version");
     dao.insert(artifact);
     artifact = artifact.withVersions("newVersion", "newVersion2");
     dao.update(artifact);

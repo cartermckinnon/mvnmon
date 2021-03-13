@@ -1,4 +1,4 @@
-package mck.mvnmon.api;
+package mck.mvnmon.api.maven;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,7 +11,7 @@ import lombok.Getter;
 
 @Getter
 @EqualsAndHashCode
-public class MavenArtifact {
+public class Artifact {
 
   private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
 
@@ -19,12 +19,12 @@ public class MavenArtifact {
   public final String artifactId;
   public final List<String> versions;
 
-  public MavenArtifact(String groupId, String artifactId, String... versions) {
+  public Artifact(String groupId, String artifactId, String... versions) {
     this(groupId, artifactId, Arrays.asList(versions));
   }
 
   @JsonCreator
-  public MavenArtifact(
+  public Artifact(
       @JsonProperty("groupId") String groupId,
       @JsonProperty("artifactId") String artifactId,
       @JsonProperty("versions") List<String> versions) {
@@ -37,7 +37,7 @@ public class MavenArtifact {
    * @param versions for example, "1.0-SNAPSHOT"
    * @return new MavenArtifact
    */
-  public MavenArtifact withVersions(String... versions) {
+  public Artifact withVersions(String... versions) {
     return withVersions(Arrays.asList(versions));
   }
 
@@ -45,8 +45,8 @@ public class MavenArtifact {
    * @param versions for example, "1.0-SNAPSHOT"
    * @return new MavenArtifact
    */
-  public MavenArtifact withVersions(List<String> versions) {
-    return new MavenArtifact(groupId, artifactId, versions);
+  public Artifact withVersions(List<String> versions) {
+    return new Artifact(groupId, artifactId, versions);
   }
 
   /** @return a JSON representation of this MavenArtifactWithId. */
@@ -68,17 +68,17 @@ public class MavenArtifact {
     }
   }
 
-  public static final MavenArtifact parse(String json) {
+  public static final Artifact parse(String json) {
     try {
-      return MAPPER.readValue(json, MavenArtifact.class);
+      return MAPPER.readValue(json, Artifact.class);
     } catch (Exception e) {
       throw new RuntimeException("failed to deserialize from json='" + json + "'", e);
     }
   }
 
-  public static final MavenArtifact parse(byte[] json) {
+  public static final Artifact parse(byte[] json) {
     try {
-      return MAPPER.readValue(json, MavenArtifact.class);
+      return MAPPER.readValue(json, Artifact.class);
     } catch (Exception e) {
       throw new RuntimeException("failed to deserialize from json='" + json + "'", e);
     }

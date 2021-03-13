@@ -1,4 +1,4 @@
-package mck.mvnmon.api;
+package mck.mvnmon.api.maven;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor
-public class MavenDependency {
+public class Dependency {
   private final String groupId;
   private final String artifactId;
   private final String version;

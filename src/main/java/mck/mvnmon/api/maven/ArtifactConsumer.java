@@ -1,5 +1,6 @@
-package mck.mvnmon.api;
+package mck.mvnmon.api.maven;
 
+import java.net.URI;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -7,17 +8,16 @@ import lombok.ToString;
 @Getter
 @ToString
 @EqualsAndHashCode
-public class MavenArtifactUpdate {
+public class ArtifactConsumer {
+  private final URI uri;
   private final String groupId;
   private final String artifactId;
   private final String currentVersion;
-  private final String newVersion;
 
-  public MavenArtifactUpdate(
-      String groupId, String artifactId, String currentVersion, String newVersion) {
+  public ArtifactConsumer(URI uri, String groupId, String artifactId, String currentVersion) {
+    this.uri = uri;
     this.groupId = groupId;
     this.artifactId = artifactId;
     this.currentVersion = currentVersion;
-    this.newVersion = newVersion;
   }
 }

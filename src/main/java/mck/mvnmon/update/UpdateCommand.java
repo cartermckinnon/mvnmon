@@ -6,7 +6,6 @@ import mck.mvnmon.MvnMonConfiguration;
 import mck.mvnmon.command.ExtendedServerCommand;
 import mck.mvnmon.nats.DispatcherManager;
 import mck.mvnmon.nats.Subjects;
-import mck.mvnmon.sql.SqlMavenArtifactSink;
 import mck.mvnmon.util.CloseableManager;
 
 public class UpdateCommand extends ExtendedServerCommand<MvnMonConfiguration> {
@@ -20,16 +19,17 @@ public class UpdateCommand extends ExtendedServerCommand<MvnMonConfiguration> {
     var jdbi = configuration.buildJdbi(environment);
     // this must be registered on the environment before the nats connection,
     // so that the nats connection is closed before this executor is shut down
-    var executor = environment.lifecycle().scheduledExecutorService("update-batcher-%d").build();
-    var nats = configuration.getNats().build(environment);
-    var sink =
-        new SqlMavenArtifactSink(
+    var executor =
+        environment.lifecycle().scheduledExecutorService("update-message-handler-%d").build();
+    var messageHandler =
+        new UpdateMessageHandler(
             jdbi,
             configuration.getUpdate().getBatchSize(),
             configuration.getUpdate().getInterval(),
             executor);
-    environment.lifecycle().manage(new CloseableManager(sink));
-    var dispatcher = nats.createDispatcher(new UpdateMessageHandler(sink));
+    environment.lifecycle().manage(new CloseableManager(messageHandler));
+    var nats = configuration.getNats().build(environment);
+    var dispatcher = nats.createDispatcher(messageHandler);
     dispatcher.subscribe(Subjects.CRAWLED, "update");
     environment.lifecycle().manage(new DispatcherManager(dispatcher));
   }

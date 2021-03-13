@@ -4,7 +4,7 @@ import io.nats.client.Connection;
 import java.util.List;
 import java.util.function.BiFunction;
 import lombok.extern.slf4j.Slf4j;
-import mck.mvnmon.api.MavenArtifact;
+import mck.mvnmon.api.maven.Artifact;
 import mck.mvnmon.nats.Subjects;
 import org.asynchttpclient.Response;
 
@@ -15,12 +15,12 @@ import org.asynchttpclient.Response;
 @Slf4j
 public class CrawlResponseHandler implements BiFunction<Response, Throwable, Void> {
 
-  private final MavenArtifact mavenArtifact;
+  private final Artifact mavenArtifact;
   private final Connection nats;
 
   private Runnable callback = null;
 
-  public CrawlResponseHandler(MavenArtifact mavenArtifact, Connection nats) {
+  public CrawlResponseHandler(Artifact mavenArtifact, Connection nats) {
     this.mavenArtifact = mavenArtifact;
     this.nats = nats;
   }

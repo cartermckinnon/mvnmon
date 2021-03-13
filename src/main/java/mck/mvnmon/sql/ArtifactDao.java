@@ -3,8 +3,8 @@ package mck.mvnmon.sql;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import mck.mvnmon.api.MavenArtifact;
-import mck.mvnmon.api.MavenArtifactWithId;
+import mck.mvnmon.api.maven.Artifact;
+import mck.mvnmon.api.maven.ArtifactWithId;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindFields;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
@@ -12,7 +12,7 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.jdbi.v3.sqlobject.statement.UseRowMapper;
 
-public interface MavenArtifactDao {
+public interface ArtifactDao {
 
   /**
    * Insert a MavenArtifact if it does not already exist.
@@ -23,7 +23,7 @@ public interface MavenArtifactDao {
       "INSERT INTO artifacts (group_id, artifact_id, versions) VALUES (:groupId, :artifactId,"
           + " :versions) ON CONFLICT DO NOTHING")
   // @GetGeneratedKeys
-  public void insert(@BindFields MavenArtifact mavenArtifact);
+  public void insert(@BindFields Artifact mavenArtifact);
 
   /**
    * Get a MavenArtifact.
@@ -33,8 +33,8 @@ public interface MavenArtifactDao {
    * @return the MavenArtifact, if it exists.
    */
   @SqlQuery("SELECT * FROM artifacts WHERE group_id = :groupId AND artifact_id = :artifactId")
-  @UseRowMapper(MavenArtifactRowMapper.class)
-  public Optional<MavenArtifact> get(
+  @UseRowMapper(ArtifactRowMapper.class)
+  public Optional<Artifact> get(
       @Bind("groupId") String groupId, @Bind("artifactId") String artifactId);
 
   /**
@@ -48,16 +48,16 @@ public interface MavenArtifactDao {
    *     complete.
    */
   @SqlQuery("SELECT * FROM artifacts WHERE id > :cursor ORDER BY id ASC LIMIT :limit")
-  @UseRowMapper(MavenArtifactWithIdRowMapper.class)
-  public List<MavenArtifactWithId> scan(@Bind("limit") int limit, @Bind("cursor") long cursor);
+  @UseRowMapper(ArtifactWithIdRowMapper.class)
+  public List<ArtifactWithId> scan(@Bind("limit") int limit, @Bind("cursor") long cursor);
 
   public static final String UPDATE_QUERY =
       "UPDATE artifacts SET versions = :versions WHERE group_id = :groupId AND artifact_id ="
           + " :artifactId";
 
   @SqlUpdate(UPDATE_QUERY)
-  public void update(@BindFields MavenArtifact mavenArtifact);
+  public void update(@BindFields Artifact mavenArtifact);
 
   @SqlBatch(UPDATE_QUERY)
-  public void update(@BindFields Collection<MavenArtifact> mavenArtifacts);
+  public void update(@BindFields Collection<Artifact> mavenArtifacts);
 }
