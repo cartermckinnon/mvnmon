@@ -1,4 +1,4 @@
-package mck.mvnmon.apiserver;
+package mck.mvnmon.command.apiserver;
 
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
