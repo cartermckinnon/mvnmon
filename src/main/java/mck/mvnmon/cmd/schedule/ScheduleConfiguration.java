@@ -1,4 +1,4 @@
-package mck.mvnmon.command.schedule;
+package mck.mvnmon.cmd.schedule;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

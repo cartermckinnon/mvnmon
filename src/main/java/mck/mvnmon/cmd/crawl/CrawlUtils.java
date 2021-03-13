@@ -1,4 +1,4 @@
-package mck.mvnmon.command.crawl;
+package mck.mvnmon.cmd.crawl;
 
 import com.jayway.jsonpath.JsonPath;
 import java.nio.charset.StandardCharsets;

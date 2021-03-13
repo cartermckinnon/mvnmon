@@ -1,4 +1,4 @@
-package mck.mvnmon.command.apiserver;
+package mck.mvnmon.cmd.apiserver;
 
 import java.util.Optional;
 import javax.validation.Valid;

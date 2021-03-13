@@ -1,4 +1,4 @@
-package mck.mvnmon.command.pom;
+package mck.mvnmon.cmd.pom;
 
 import de.pdark.decentxml.Document;
 import io.dropwizard.cli.Command;
@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import mck.mvnmon.api.maven.ArtifactUpdate;
 import mck.mvnmon.api.maven.Dependency;
-import mck.mvnmon.command.crawl.CrawlUtils;
+import mck.mvnmon.cmd.crawl.CrawlUtils;
 import mck.mvnmon.util.PaddedStringBuilder;
 import mck.mvnmon.util.PomFiles;
 import mck.mvnmon.util.XmlFiles;

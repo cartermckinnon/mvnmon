@@ -1,4 +1,4 @@
-package mck.mvnmon.command.apiserver;
+package mck.mvnmon.cmd.apiserver;
 
 import io.nats.client.Connection;
 import javax.validation.constraints.NotNull;

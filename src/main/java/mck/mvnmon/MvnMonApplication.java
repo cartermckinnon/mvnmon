@@ -5,13 +5,13 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import mck.mvnmon.command.CheckConfigurationCommand;
-import mck.mvnmon.command.apiserver.ApiServerCommand;
-import mck.mvnmon.command.crawl.CrawlCommand;
-import mck.mvnmon.command.pom.PomDependenciesCommand;
-import mck.mvnmon.command.pom.PomUpdateDependenciesCommand;
-import mck.mvnmon.command.schedule.ScheduleCommand;
-import mck.mvnmon.command.update.UpdateCommand;
+import mck.mvnmon.cmd.CheckConfigurationCommand;
+import mck.mvnmon.cmd.apiserver.ApiServerCommand;
+import mck.mvnmon.cmd.crawl.CrawlCommand;
+import mck.mvnmon.cmd.pom.PomDependenciesCommand;
+import mck.mvnmon.cmd.pom.PomUpdateDependenciesCommand;
+import mck.mvnmon.cmd.schedule.ScheduleCommand;
+import mck.mvnmon.cmd.update.UpdateCommand;
 
 public class MvnMonApplication extends Application<MvnMonConfiguration> {
   public static final void main(String[] args) throws Exception {

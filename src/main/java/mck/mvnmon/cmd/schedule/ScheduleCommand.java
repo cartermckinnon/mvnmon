@@ -1,9 +1,9 @@
-package mck.mvnmon.command.schedule;
+package mck.mvnmon.cmd.schedule;
 
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
 import mck.mvnmon.MvnMonConfiguration;
-import mck.mvnmon.command.LifecycleManagedCommand;
+import mck.mvnmon.cmd.LifecycleManagedCommand;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 public class ScheduleCommand extends LifecycleManagedCommand<MvnMonConfiguration> {

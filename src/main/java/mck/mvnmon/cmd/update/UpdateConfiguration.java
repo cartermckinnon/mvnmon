@@ -1,4 +1,4 @@
-package mck.mvnmon.command.update;
+package mck.mvnmon.cmd.update;
 
 import io.dropwizard.util.Duration;
 import lombok.EqualsAndHashCode;

@@ -1,9 +1,9 @@
-package mck.mvnmon.command.update;
+package mck.mvnmon.cmd.update;
 
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
 import mck.mvnmon.MvnMonConfiguration;
-import mck.mvnmon.command.ExtendedServerCommand;
+import mck.mvnmon.cmd.ExtendedServerCommand;
 import mck.mvnmon.nats.DispatcherManager;
 import mck.mvnmon.nats.Subjects;
 import mck.mvnmon.util.CloseableManager;

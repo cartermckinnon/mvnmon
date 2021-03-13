@@ -1,5 +1,6 @@
 package mck.mvnmon.command.crawl;
 
+import mck.mvnmon.cmd.crawl.CrawlUtils;
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.ArrayList;
