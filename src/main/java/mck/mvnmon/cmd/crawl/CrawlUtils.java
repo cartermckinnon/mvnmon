@@ -85,9 +85,7 @@ public class CrawlUtils {
     ComparableVersion candidate = null;
     for (int i = 0; i < candidateVersions.size(); i++) {
       ComparableVersion currentCandidate = candidateVersions.get(i);
-      int editDistance =
-          LevenshteinDistance.getDefaultInstance()
-              .apply(currentVersion, currentCandidate.toString());
+      int editDistance = LevenshteinDistance.apply(currentVersion, currentCandidate.toString());
       int score = editDistance + i;
       if (score < minimumScore) {
         minimumScore = score;

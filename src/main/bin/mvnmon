@@ -2,7 +2,7 @@
 
 set -e
 
-MVNMON_HOME=$(cd "$(dirname "$0")/.."; pwd)
+MVNMON_HOME="$(cd "$(dirname "$0")/.."; pwd)"
 
 java \
   --enable-preview \
