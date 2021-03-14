@@ -1,12 +1,12 @@
 package dev.mck.mvnmon.sql;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 import dev.mck.mvnmon.api.maven.ArtifactConsumer;
 import dev.mck.mvnmon.api.maven.ArtifactConsumerWithId;
 import dev.mck.mvnmon.sql.mapper.ArtifactConsumerRowMapper;
 import dev.mck.mvnmon.sql.mapper.ArtifactConsumerWithIdRowMapper;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindFields;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
@@ -16,17 +16,27 @@ import org.jdbi.v3.sqlobject.statement.UseRowMapper;
 
 public interface ArtifactConsumerDao {
 
-  /**
-   * Insert an artifact consumer, or update it if it already exists.
-   *
-   * @param consumer to be inserted.
-   */
-  @SqlUpdate(
+  public static final String UPSERT_QUERY =
       "INSERT INTO consumers (repository, pom, group_id, artifact_id, current_version)"
           + " VALUES (:repository, :pom, :groupId, :artifactId, :currentVersion)"
           + " ON CONFLICT ON CONSTRAINT repository_pom_group_id_artifact_id"
-          + " DO UPDATE SET current_version = :currentVersion")
+          + " DO UPDATE SET current_version = :currentVersion";
+
+  /**
+   * Insert an artifact consumer, updating it if it already exists.
+   *
+   * @param consumer to be upserted.
+   */
+  @SqlUpdate(UPSERT_QUERY)
   public void upsert(@BindFields ArtifactConsumer consumer);
+
+  /**
+   * Insert a batch of artifact consumers, updating them if they already exist.
+   *
+   * @param consumers to be upserted.
+   */
+  @SqlBatch(UPSERT_QUERY)
+  public void upsert(@BindFields Collection<ArtifactConsumer> consumers);
 
   /**
    * Get an artifact consumer.
@@ -95,4 +105,8 @@ public interface ArtifactConsumerDao {
    */
   @SqlBatch(UPDATE_CURRENT_VERSION_QUERY)
   public void updateCurrentVersion(@BindFields Collection<ArtifactConsumer> consumers);
+
+  /** Delete all the artifact consumers for a (repository, pom) pair. */
+  @SqlUpdate("DELETE FROM consumers WHERE repository = :repository AND pom = :pom")
+  public void delete(@Bind("repository") String repository, @Bind("pom") String pom);
 }

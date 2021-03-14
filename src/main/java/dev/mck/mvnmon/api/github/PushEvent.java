@@ -8,7 +8,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.jackson.Jackson;
-import java.net.URI;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -257,7 +259,7 @@ public class PushEvent {
    *     https://raw.githubusercontent.com/cartermckinnon/mvnmon/4b73f50417b9da14277eac73a2cb84d455ab3d74/README.md}.
    */
   @JsonIgnore
-  public List<URI> getPomRawUrls() {
+  public List<URL> getPomRawUrls() {
     Set<String> poms = new HashSet<>();
     for (Commit commit : commits) {
       for (String addedFile : commit.getAdded()) {
@@ -278,10 +280,22 @@ public class PushEvent {
    * @param file in this commit.
    * @return url for raw file content.
    */
-  private URI rawUrl(String file) {
-    return URI.create(
-        String.format(
-            "https://raw.githubusercontent.com/%s/%s/%s",
-            repository.getName(), repository.getDefaultBranch(), file));
+  private URL rawUrl(String file) {
+    try {
+      return new URL(
+          String.format(
+              "https://raw.githubusercontent.com/%s/%s/%s",
+              repository.getName(), repository.getDefaultBranch(), file));
+    } catch (MalformedURLException e) {
+      throw new RuntimeException("raw URL is malformed!", e);
+    }
+  }
+
+  public static final PushEvent parse(byte[] json) {
+    try {
+      return MAPPER.readValue(json, PushEvent.class);
+    } catch (IOException e) {
+      throw new IllegalArgumentException("failed to deserialize!", e);
+    }
   }
 }

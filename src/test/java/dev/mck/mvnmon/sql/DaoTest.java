@@ -1,6 +1,5 @@
 package dev.mck.mvnmon.sql;
 
-import dev.mck.mvnmon.sql.PostgresJdbiFactory;
 import static org.assertj.core.api.Assertions.*;
 
 import io.dropwizard.db.DataSourceFactory;
@@ -17,6 +16,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.postgresql.Driver;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
@@ -28,7 +30,13 @@ public abstract class DaoTest {
       new GenericContainer(DockerImageName.parse("postgres:latest"))
           .withEnv("POSTGRES_USER", "user")
           .withEnv("POSTGRES_PASSWORD", "password")
-          .withExposedPorts(5432);
+          .withExposedPorts(5432)
+          .waitingFor(
+              new WaitAllStrategy()
+                  .withStrategy(Wait.forListeningPort())
+                  .withStrategy(
+                      new LogMessageWaitStrategy()
+                          .withRegEx(".*database system is ready to accept connections.*")));
 
   private Connection conn = null;
   private Liquibase liquibase = null;

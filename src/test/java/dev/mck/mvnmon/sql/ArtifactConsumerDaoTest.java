@@ -1,7 +1,5 @@
 package dev.mck.mvnmon.sql;
 
-import dev.mck.mvnmon.sql.ArtifactConsumerDao;
-import dev.mck.mvnmon.sql.ArtifactDao;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.mck.mvnmon.api.maven.Artifact;

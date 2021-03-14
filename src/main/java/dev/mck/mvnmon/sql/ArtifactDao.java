@@ -1,12 +1,12 @@
 package dev.mck.mvnmon.sql;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 import dev.mck.mvnmon.api.maven.Artifact;
 import dev.mck.mvnmon.api.maven.ArtifactWithId;
 import dev.mck.mvnmon.sql.mapper.ArtifactRowMapper;
 import dev.mck.mvnmon.sql.mapper.ArtifactWithIdRowMapper;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindFields;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
@@ -16,16 +16,26 @@ import org.jdbi.v3.sqlobject.statement.UseRowMapper;
 
 public interface ArtifactDao {
 
+  public static final String INSERT_QUERY =
+      "INSERT INTO artifacts (group_id, artifact_id, versions)"
+          + " VALUES (:groupId, :artifactId, :versions)"
+          + " ON CONFLICT DO NOTHING";
+
   /**
    * Insert an artifact if it does not already exist.
    *
    * @param artifact to be inserted.
    */
-  @SqlUpdate(
-      "INSERT INTO artifacts (group_id, artifact_id, versions) VALUES (:groupId, :artifactId,"
-          + " :versions) ON CONFLICT DO NOTHING")
-  // @GetGeneratedKeys
+  @SqlUpdate(INSERT_QUERY)
   public void insert(@BindFields Artifact artifact);
+
+  /**
+   * Insert a batch of artifacts, if they do not already exist.
+   *
+   * @param artifacts to be inserted.
+   */
+  @SqlBatch(INSERT_QUERY)
+  public void insert(@BindFields Collection<Artifact> artifacts);
 
   /**
    * Get an artifact.
