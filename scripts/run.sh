@@ -7,4 +7,4 @@ cd ..
 
 JAR=$(ls target/mvnmon*.jar)
 
-java --enable-preview -cp target/lib/*:$JAR mck.mvnmon.MvnMonApplication $@
+java --enable-preview -cp target/lib/*:$JAR dev.mck.mvnmon.MvnMonApplication $@
