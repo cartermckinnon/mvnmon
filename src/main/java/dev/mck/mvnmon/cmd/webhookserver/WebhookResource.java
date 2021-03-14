@@ -3,6 +3,8 @@ package dev.mck.mvnmon.cmd.webhookserver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
+import dev.mck.mvnmon.api.github.PushEvent;
+import dev.mck.mvnmon.nats.Subjects;
 import io.dropwizard.jackson.Jackson;
 import io.nats.client.Connection;
 import java.io.IOException;
@@ -11,8 +13,6 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import lombok.extern.slf4j.Slf4j;
-import dev.mck.mvnmon.api.github.PushEvent;
-import dev.mck.mvnmon.nats.Subjects;
 
 /** Receives GitHub webhook "push" events. */
 @Slf4j
@@ -35,6 +35,14 @@ public class WebhookResource {
    */
   @POST
   public void receive(@HeaderParam("X-Hub-Signature-256") String signatureHeader, byte[] payload) {
+    if (signatureHeader == null) {
+      LOG.debug("received a request without a signature header!");
+      return;
+    }
+    if (payload == null) {
+      LOG.debug("received a request without a payload!");
+      return;
+    }
     PushEvent push = verifyAndDeserialize(secret, signatureHeader, payload);
     if (push.isToDefaultBranch() && push.containsAddedOrModifiedPoms()) {
       LOG.info("received push={}", push);
