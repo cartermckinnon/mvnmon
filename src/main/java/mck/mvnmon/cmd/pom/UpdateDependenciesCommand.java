@@ -18,12 +18,12 @@ import mck.mvnmon.util.XmlFiles;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-public class PomUpdateDependenciesCommand extends Command {
+public class UpdateDependenciesCommand extends Command {
 
-  public PomUpdateDependenciesCommand() {
+  public UpdateDependenciesCommand() {
     super(
-        "pom-update-dependencies",
-        "Utility that will update the dependencies found in a POM file to the latest versions.");
+        "update-dependencies",
+        "Update the dependencies found in a POM file to the latest versions.");
   }
 
   @Override

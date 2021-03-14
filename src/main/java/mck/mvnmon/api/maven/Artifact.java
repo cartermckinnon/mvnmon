@@ -15,6 +15,10 @@ public class Artifact {
 
   private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
 
+  /*
+  fields are public to allow binding via @BindFields
+  */
+
   public final String groupId;
   public final String artifactId;
   public final List<String> versions;

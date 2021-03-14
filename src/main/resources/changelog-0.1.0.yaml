@@ -1,0 +1,87 @@
+---
+databaseChangeLog:
+  - changeSet:
+      id: "0.1.0"
+      author: "Carter McKinnon"
+      changes:
+        - createTable:
+            tableName: "artifacts"
+            columns:
+              - column:
+                  name: "id"
+                  type: "bigint"
+                  autoIncrement: "true"
+                  constraints:
+                    primaryKey: "true"
+                    nullable: "false"
+              - column:
+                  name: "group_id"
+                  type: "varchar(256)"
+                  constraints:
+                    nullable: "false"
+              - column:
+                  name: "artifact_id"
+                  type: "varchar(256)"
+                  constraints:
+                    nullable: "false"
+              - column:
+                  name: "versions"
+                  type: "varchar[]"
+                  constraints:
+                    nullable: "false"
+
+        # combinations of group_id, artifact_id must be unique
+        - addUniqueConstraint:
+            columnNames: "group_id, artifact_id"
+            constraintName: "group_id_artifact_id"
+            tableName: "artifacts"
+
+        - createTable:
+            tableName: "consumers"
+            columns:
+              - column:
+                  name: "id"
+                  type: "bigint"
+                  autoIncrement: "true"
+                  constraints:
+                    primaryKey: "true"
+                    nullable: "false"
+              - column:
+                  name: "repository"
+                  type: "varchar(256)"
+                  constraints:
+                    nullable: "false"
+              - column:
+                  name: "pom"
+                  type: "varchar(256)"
+                  constraints:
+                    nullable: "false"
+              - column:
+                  name: "group_id"
+                  type: "varchar(256)"
+                  constraints:
+                    nullable: "false"
+              - column:
+                  name: "artifact_id"
+                  type: "varchar(256)"
+                  constraints:
+                    nullable: "false"
+              - column:
+                  name: "current_version"
+                  type: "varchar(256)"
+                  constraints:
+                    nullable: "false"
+
+        # combinations of repository, pom, group_id, artifact_id must be unique
+        - addUniqueConstraint:
+            columnNames: "repository, pom, group_id, artifact_id"
+            constraintName: "repository_pom_group_id_artifact_id"
+            tableName: "consumers"
+        
+        - addForeignKeyConstraint:
+            baseColumnNames: "group_id, artifact_id"
+            baseTableName: "consumers"
+            constraintName: "fk_group_id_artifact_id"
+            referencedColumnNames: "group_id, artifact_id"
+            referencedTableName: "artifacts"
+            validate: "true"

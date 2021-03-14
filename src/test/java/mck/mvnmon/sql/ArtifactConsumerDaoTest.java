@@ -1,28 +1,36 @@
 package mck.mvnmon.sql;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import mck.mvnmon.api.maven.Artifact;
-import mck.mvnmon.api.maven.ArtifactWithId;
+import mck.mvnmon.api.maven.ArtifactConsumer;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-@Testcontainers
-public class ArtifactDaoTest extends DaoTest {
+public class ArtifactConsumerDaoTest extends DaoTest {
 
   @Test
   public void scan() {
-    var dao = getJdbi().onDemand(ArtifactDao.class);
+    var artifactDao = getJdbi().onDemand(ArtifactDao.class);
     var artifact = new Artifact("group", "artifact", "version");
-    dao.insert(artifact);
-    var res = dao.scan(100, 0);
+    artifactDao.insert(artifact);
+
+    var dao = getJdbi().onDemand(ArtifactConsumerDao.class);
+    var consumer = new ArtifactConsumer("repository", "pom.xml", "group", "artifact", "version");
+    dao.upsert(consumer);
+
+    var res = dao.scan("group", "artifact", 100, 0);
     assertThat(res).hasSize(1);
-    ArtifactWithId artifactWithId = res.get(0);
+
     // id's must start at 1 for initial cursor to work correctly
-    assertThat(artifactWithId.getId()).isEqualTo(1);
-    assertThat(artifactWithId.getGroupId()).isEqualTo("group");
-    assertThat(artifactWithId.getArtifactId()).isEqualTo("artifact");
-    assertThat(artifactWithId.getVersions()).containsExactly("version");
+    var consumerWithId = res.get(0);
+    assertThat(consumerWithId.getId()).isEqualTo(1);
+    assertThat(consumerWithId.getRepository()).isEqualTo("repository");
+    assertThat(consumerWithId.getPom()).isEqualTo("pom.xml");
+    assertThat(consumerWithId.getGroupId()).isEqualTo("group");
+    assertThat(consumerWithId.getArtifactId()).isEqualTo("artifact");
+    assertThat(consumerWithId.getCurrentVersion()).isEqualTo("version");
+
+    assertThat(dao.scan("group", "artifact", 100, 1)).isEmpty();
   }
 
   @Test

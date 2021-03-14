@@ -60,7 +60,7 @@ public class UpdateMessageHandler implements MessageHandler, Closeable {
       }
       batch.add(artifact);
     }
-    dao.update(batch);
+    dao.updateVersions(batch);
     LOG.info("updated batch={}", batch);
   }
 

@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+/** Represents an "author" or "committer" of a GitHub webhook "push" event. */
 @Getter
 @ToString
 @EqualsAndHashCode

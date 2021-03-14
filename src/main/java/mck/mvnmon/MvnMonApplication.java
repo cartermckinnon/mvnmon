@@ -8,10 +8,10 @@ import io.dropwizard.setup.Environment;
 import mck.mvnmon.cmd.CheckConfigurationCommand;
 import mck.mvnmon.cmd.apiserver.ApiServerCommand;
 import mck.mvnmon.cmd.crawl.CrawlCommand;
-import mck.mvnmon.cmd.pom.PomDependenciesCommand;
-import mck.mvnmon.cmd.pom.PomUpdateDependenciesCommand;
+import mck.mvnmon.cmd.pom.PomCommand;
 import mck.mvnmon.cmd.schedule.ScheduleCommand;
 import mck.mvnmon.cmd.update.UpdateCommand;
+import mck.mvnmon.cmd.webhookserver.WebhookServerCommand;
 
 public class MvnMonApplication extends Application<MvnMonConfiguration> {
   public static final void main(String[] args) throws Exception {
@@ -29,13 +29,18 @@ public class MvnMonApplication extends Application<MvnMonConfiguration> {
     bootstrap.addCommand(new CrawlCommand(this));
     bootstrap.addCommand(new UpdateCommand(this));
     bootstrap.addCommand(new ApiServerCommand(this));
-    bootstrap.addCommand(new PomDependenciesCommand());
-    bootstrap.addCommand(new PomUpdateDependenciesCommand());
+    bootstrap.addCommand(new WebhookServerCommand(this));
+    bootstrap.addCommand(new PomCommand());
     bootstrap.addBundle(
         new MigrationsBundle<MvnMonConfiguration>() {
           @Override
           public DataSourceFactory getDataSourceFactory(MvnMonConfiguration configuration) {
             return configuration.getDb();
+          }
+
+          @Override
+          public String getMigrationsFileName() {
+            return "migrations.yaml";
           }
         });
   }

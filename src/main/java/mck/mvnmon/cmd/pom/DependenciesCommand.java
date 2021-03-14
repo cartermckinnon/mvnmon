@@ -12,12 +12,10 @@ import mck.mvnmon.util.XmlFiles;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
-public class PomDependenciesCommand extends Command {
+public class DependenciesCommand extends Command {
 
-  public PomDependenciesCommand() {
-    super(
-        "pom-dependencies",
-        "Utility that will parse and print the dependencies found in a POM file.");
+  public DependenciesCommand() {
+    super("dependencies", "Parse and print the dependencies found in a POM file.");
   }
 
   @Override

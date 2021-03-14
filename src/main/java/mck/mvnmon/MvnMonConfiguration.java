@@ -13,6 +13,7 @@ import lombok.ToString;
 import mck.mvnmon.cmd.crawl.CrawlConfiguration;
 import mck.mvnmon.cmd.schedule.ScheduleConfiguration;
 import mck.mvnmon.cmd.update.UpdateConfiguration;
+import mck.mvnmon.cmd.webhookserver.WebhookConfiguration;
 import mck.mvnmon.nats.NatsFactory;
 import mck.mvnmon.sql.PostgresJdbiFactory;
 import org.jdbi.v3.core.Jdbi;
@@ -53,6 +54,11 @@ public class MvnMonConfiguration extends Configuration {
   @NotNull
   @JsonProperty("crawl")
   private CrawlConfiguration crawl = new CrawlConfiguration();
+
+  @Valid
+  @NotNull
+  @JsonProperty("webhook")
+  private WebhookConfiguration webhook = new WebhookConfiguration();
 
   public Jdbi buildJdbi(Environment e) {
     var factory = new PostgresJdbiFactory();
