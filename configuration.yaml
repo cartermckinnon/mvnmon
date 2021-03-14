@@ -4,3 +4,5 @@ db:
   url: jdbc:postgresql://localhost:5432/
   user: postgres
   password: password
+webhook:
+  secret: secret
