@@ -1,6 +1,5 @@
 FROM adoptopenjdk:15-jdk AS builder
 RUN apt-get update && apt-get install maven binutils -y
-
 WORKDIR /workdir
 ADD pom.xml pom.xml
 RUN mvn dependency:go-offline

@@ -29,7 +29,7 @@ public class CrawlerCommand extends ExtendedServerCommand<MvnMonConfiguration> {
 
     var responseListenerFactory =
         new CrawlerResponseListenerFactory(
-            executor, nats, configuration.getCrawl().getMaxConcurrentRequests());
+            executor, nats, configuration.getCrawler().getMaxConcurrentRequests());
     var requestHandler = new CrawlerMessageHandler(httpClient, responseListenerFactory);
 
     var dispatcher = nats.createDispatcher(requestHandler);

@@ -44,17 +44,17 @@ public class MvnMonConfiguration extends Configuration {
   @Valid
   @NotNull
   @JsonProperty("updater")
-  private UpdaterConfiguration update = new UpdaterConfiguration();
+  private UpdaterConfiguration updater = new UpdaterConfiguration();
 
   @Valid
   @NotNull
   @JsonProperty("scheduler")
-  private SchedulerConfiguration schedule = new SchedulerConfiguration();
+  private SchedulerConfiguration scheduler = new SchedulerConfiguration();
 
   @Valid
   @NotNull
   @JsonProperty("crawler")
-  private CrawlerConfiguration crawl = new CrawlerConfiguration();
+  private CrawlerConfiguration crawler = new CrawlerConfiguration();
 
   @Valid
   @NotNull
@@ -64,7 +64,7 @@ public class MvnMonConfiguration extends Configuration {
   @Valid
   @NotNull
   @JsonProperty("pullRequester")
-  private PullRequesterConfiguration pullRequest = new PullRequesterConfiguration();
+  private PullRequesterConfiguration pullRequester = new PullRequesterConfiguration();
 
   public Jdbi buildJdbi(Environment e) {
     var factory = new PostgresJdbiFactory();

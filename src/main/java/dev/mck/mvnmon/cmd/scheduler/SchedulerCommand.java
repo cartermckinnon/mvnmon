@@ -18,6 +18,6 @@ public class SchedulerCommand extends LifecycleManagedCommand<MvnMonConfiguratio
       throws Exception {
     var jdbi = configuration.buildJdbi(environment);
     var nats = configuration.getNats().build(environment);
-    new Scheduler(configuration.getSchedule(), jdbi, nats).run();
+    new Scheduler(configuration.getScheduler(), jdbi, nats).run();
   }
 }

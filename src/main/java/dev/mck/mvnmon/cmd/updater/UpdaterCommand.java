@@ -24,8 +24,8 @@ public class UpdaterCommand extends ExtendedServerCommand<MvnMonConfiguration> {
     var messageHandler =
         new UpdaterMessageHandler(
             jdbi,
-            configuration.getUpdate().getBatchSize(),
-            configuration.getUpdate().getInterval(),
+            configuration.getUpdater().getBatchSize(),
+            configuration.getUpdater().getInterval(),
             executor);
     environment.lifecycle().manage(new CloseableManager(messageHandler));
     var nats = configuration.getNats().build(environment);

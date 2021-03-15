@@ -18,5 +18,6 @@ public class PullRequesterConfiguration {
   @Max(100)
   private int batchSize = 100;
 
+  /** An access key is always required; we won't be able to commit to a repository anonymously */
   @NotNull @NotBlank private String accessKey;
 }

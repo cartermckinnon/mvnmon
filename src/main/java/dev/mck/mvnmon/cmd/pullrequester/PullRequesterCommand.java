@@ -17,7 +17,7 @@ public class PullRequesterCommand extends ExtendedServerCommand<MvnMonConfigurat
   @Override
   protected void run(Environment environment, MvnMonConfiguration configuration) throws Exception {
     var jdbi = configuration.buildJdbi(environment);
-    var github = GitHub.connectUsingOAuth(configuration.getPullRequest().getAccessKey());
+    var github = GitHub.connectUsingOAuth(configuration.getPullRequester().getAccessKey());
     var executor = environment.lifecycle().executorService("pull-requester-%d").build();
     var messageHandler = new PullRequesterMessageHandler(jdbi, github, executor);
     var nats = configuration.getNats().build(environment);
