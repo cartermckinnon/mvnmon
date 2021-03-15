@@ -42,8 +42,7 @@ public abstract class ExtendedServerCommand<T extends Configuration> extends Env
   }
 
   @Override
-  protected void run(Environment environment, Namespace namespace, T configuration)
-      throws Exception {
+  public void run(Environment environment, Namespace namespace, T configuration) throws Exception {
     run(environment, configuration);
     final Server server = configuration.getServerFactory().build(environment);
     try {

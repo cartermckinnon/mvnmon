@@ -1,17 +1,17 @@
 package dev.mck.mvnmon;
 
+import dev.mck.mvnmon.cmd.CheckConfigurationCommand;
+import dev.mck.mvnmon.cmd.apiserver.ApiServerCommand;
+import dev.mck.mvnmon.cmd.crawler.CrawlerCommand;
+import dev.mck.mvnmon.cmd.pom.PomCommand;
+import dev.mck.mvnmon.cmd.scheduler.SchedulerCommand;
+import dev.mck.mvnmon.cmd.updater.UpdaterCommand;
+import dev.mck.mvnmon.cmd.webhook.WebhookCommand;
 import io.dropwizard.Application;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import dev.mck.mvnmon.cmd.CheckConfigurationCommand;
-import dev.mck.mvnmon.cmd.apiserver.ApiServerCommand;
-import dev.mck.mvnmon.cmd.crawl.CrawlCommand;
-import dev.mck.mvnmon.cmd.pom.PomCommand;
-import dev.mck.mvnmon.cmd.schedule.ScheduleCommand;
-import dev.mck.mvnmon.cmd.update.UpdateCommand;
-import dev.mck.mvnmon.cmd.webhookserver.WebhookServerCommand;
 
 public class MvnMonApplication extends Application<MvnMonConfiguration> {
   public static final void main(String[] args) throws Exception {
@@ -25,11 +25,11 @@ public class MvnMonApplication extends Application<MvnMonConfiguration> {
 
   @Override
   public void initialize(Bootstrap<MvnMonConfiguration> bootstrap) {
-    bootstrap.addCommand(new ScheduleCommand(this));
-    bootstrap.addCommand(new CrawlCommand(this));
-    bootstrap.addCommand(new UpdateCommand(this));
+    bootstrap.addCommand(new SchedulerCommand(this));
+    bootstrap.addCommand(new CrawlerCommand(this));
+    bootstrap.addCommand(new UpdaterCommand(this));
     bootstrap.addCommand(new ApiServerCommand(this));
-    bootstrap.addCommand(new WebhookServerCommand(this));
+    bootstrap.addCommand(new WebhookCommand(this));
     bootstrap.addCommand(new PomCommand());
     bootstrap.addBundle(
         new MigrationsBundle<MvnMonConfiguration>() {

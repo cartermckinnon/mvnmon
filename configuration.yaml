@@ -2,7 +2,12 @@
 db:
   driverClass: org.postgresql.Driver
   url: jdbc:postgresql://localhost:5432/
-  user: postgres
+  user: user
   password: password
+
 webhook:
-  secret: secret
+  frontend:
+    secret: secret
+
+pullRequester:
+  accessKey: accessKey

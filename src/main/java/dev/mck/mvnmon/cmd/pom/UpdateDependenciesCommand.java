@@ -1,6 +1,12 @@
 package dev.mck.mvnmon.cmd.pom;
 
 import de.pdark.decentxml.Document;
+import dev.mck.mvnmon.api.maven.ArtifactUpdate;
+import dev.mck.mvnmon.api.maven.Dependency;
+import dev.mck.mvnmon.cmd.crawler.CrawlerUtils;
+import dev.mck.mvnmon.util.PaddedStringBuilder;
+import dev.mck.mvnmon.util.PomFiles;
+import dev.mck.mvnmon.util.XmlFiles;
 import io.dropwizard.cli.Command;
 import io.dropwizard.setup.Bootstrap;
 import java.io.File;
@@ -9,12 +15,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import dev.mck.mvnmon.api.maven.ArtifactUpdate;
-import dev.mck.mvnmon.api.maven.Dependency;
-import dev.mck.mvnmon.cmd.crawl.CrawlUtils;
-import dev.mck.mvnmon.util.PaddedStringBuilder;
-import dev.mck.mvnmon.util.PomFiles;
-import dev.mck.mvnmon.util.XmlFiles;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 
@@ -39,10 +39,10 @@ public class UpdateDependenciesCommand extends Command {
 
     Collection<ArtifactUpdate> updates = new ArrayList<>();
     for (Dependency dependency : dependencies) {
-      String crawlUrl = CrawlUtils.buildUrl(dependency.getGroupId(), dependency.getArtifactId());
+      String crawlUrl = CrawlerUtils.buildUrl(dependency.getGroupId(), dependency.getArtifactId());
       byte[] response = new URL(crawlUrl).openStream().readAllBytes();
-      List<String> latestVersions = CrawlUtils.parseLatestVersionsFromResponse(response);
-      CrawlUtils.getNewVersion(dependency.getVersion(), latestVersions)
+      List<String> latestVersions = CrawlerUtils.parseLatestVersionsFromResponse(response);
+      PomFiles.getNewVersion(dependency.getVersion(), latestVersions)
           .ifPresent(
               newVersion -> {
                 updates.add(

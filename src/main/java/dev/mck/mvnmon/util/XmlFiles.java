@@ -6,7 +6,6 @@ import de.pdark.decentxml.Element;
 import de.pdark.decentxml.XMLParser;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -42,14 +41,17 @@ public enum XmlFiles {
   }
 
   public static Document parseXmlFile(URL pomFileUrl) throws IOException {
-    InputStream stream = pomFileUrl.openStream();
-    byte[] bytes = stream.readAllBytes();
+    byte[] bytes = pomFileUrl.openStream().readAllBytes();
     String xml = new String(bytes, StandardCharsets.UTF_8);
     return XMLParser.parse(xml);
   }
 
   public static Document parseXmlFile(File pomFile) throws IOException {
     return XMLParser.parse(pomFile);
+  }
+
+  public static Document parseXmlFile(String xml) {
+    return XMLParser.parse(xml);
   }
 
   public static boolean updateFirstChild(Element parentElement, String elementName, String value) {
