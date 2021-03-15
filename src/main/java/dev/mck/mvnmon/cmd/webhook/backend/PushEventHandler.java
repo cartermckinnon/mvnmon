@@ -41,6 +41,9 @@ public class PushEventHandler implements MessageHandler {
       }
       var dependencies = PomFiles.getDependencies(doc);
 
+      // TODO: store a hash of the existing dependencies and compare it with the POM we just
+      // TODO: downloaded, if it hasn't changed, we can return early
+
       // ensure that all depended-on artifacts exist in the artifacts table
       var artifacts =
           dependencies.stream()
@@ -52,8 +55,6 @@ public class PushEventHandler implements MessageHandler {
       var consumerDao = jdbi.onDemand(ArtifactConsumerDao.class);
 
       // remove any existing artifact consumers for this pom, in case some have been removed
-      // TODO: store a hash of the dependencies and compare it with the POM we just downloaded
-      // TODO: if it hasn't changed, we can return early
       consumerDao.delete(push.getRepository().getName(), pom.getFile());
 
       // insert all the consumed artifacts in this POM
