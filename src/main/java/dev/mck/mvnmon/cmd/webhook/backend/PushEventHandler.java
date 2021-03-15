@@ -52,7 +52,8 @@ public class PushEventHandler implements MessageHandler {
       var consumerDao = jdbi.onDemand(ArtifactConsumerDao.class);
 
       // remove any existing artifact consumers for this pom, in case some have been removed
-      // TODO: cleanup could be done at PR time; if the artifact is no longer present in the POM
+      // TODO: store a hash of the dependencies and compare it with the POM we just downloaded
+      // TODO: if it hasn't changed, we can return early
       consumerDao.delete(push.getRepository().getName(), pom.getFile());
 
       // insert all the consumed artifacts in this POM
