@@ -35,7 +35,7 @@ $MVNMON_HOME/bin/mvnmon backend configuration/backend.yaml
 
 The `backend` will receive work to do from the `frontend` and the scheduler via `nats-server`. Modify [configuration/backend.yaml](configuration/backend.yaml) as necessary.
 
-3. Run the scheduler, every once in a while:
+3. Run the scheduler, every once in a while (such as every 24 hours):
 ```sh
 curl -X POST $BACKEND:$ADMIN_PORT/tasks/scheduler
 ```
