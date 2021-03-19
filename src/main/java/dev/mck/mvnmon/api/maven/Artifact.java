@@ -2,23 +2,16 @@ package dev.mck.mvnmon.api.maven;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.dropwizard.jackson.Jackson;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import java.util.Arrays;
 import java.util.List;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import java.util.Objects;
 
-@Getter
-@EqualsAndHashCode
 public class Artifact {
-
-  private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
-
   /*
   fields are public to allow binding via @BindFields
   */
-
   public final String groupId;
   public final String artifactId;
   public final List<String> versions;
@@ -53,38 +46,58 @@ public class Artifact {
     return new Artifact(groupId, artifactId, versions);
   }
 
-  /** @return a JSON representation of this MavenArtifactWithId. */
   @Override
   public String toString() {
-    try {
-      return MAPPER.writeValueAsString(this);
-    } catch (Exception e) {
-      throw new RuntimeException("failed to serialize to String", e);
-    }
+    return toString(MoreObjects.toStringHelper(this));
   }
 
-  /** @return UTF_8 bytes of JSON representation. */
-  public byte[] toBytes() {
-    try {
-      return MAPPER.writeValueAsBytes(this);
-    } catch (Exception e) {
-      throw new RuntimeException("failed to serialize to byte[]", e);
-    }
+  public String toString(ToStringHelper helper) {
+    return helper
+        .add("groupId", groupId)
+        .add("artifactId", artifactId)
+        .add("versions", versions)
+        .toString();
   }
 
-  public static final Artifact parse(String json) {
-    try {
-      return MAPPER.readValue(json, Artifact.class);
-    } catch (Exception e) {
-      throw new RuntimeException("failed to deserialize from json='" + json + "'", e);
-    }
+  public String getGroupId() {
+    return this.groupId;
   }
 
-  public static final Artifact parse(byte[] json) {
-    try {
-      return MAPPER.readValue(json, Artifact.class);
-    } catch (Exception e) {
-      throw new RuntimeException("failed to deserialize from json='" + json + "'", e);
+  public String getArtifactId() {
+    return this.artifactId;
+  }
+
+  public List<String> getVersions() {
+    return this.versions;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 5;
+    hash = 29 * hash + Objects.hashCode(this.groupId);
+    hash = 29 * hash + Objects.hashCode(this.artifactId);
+    hash = 29 * hash + Objects.hashCode(this.versions);
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
     }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final Artifact other = (Artifact) obj;
+    if (!Objects.equals(this.groupId, other.groupId)) {
+      return false;
+    }
+    if (!Objects.equals(this.artifactId, other.artifactId)) {
+      return false;
+    }
+    return Objects.equals(this.versions, other.versions);
   }
 }

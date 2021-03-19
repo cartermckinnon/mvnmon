@@ -5,16 +5,18 @@ import io.dropwizard.Configuration;
 import io.dropwizard.cli.Cli;
 import io.dropwizard.cli.ConfiguredCommand;
 import io.dropwizard.setup.Bootstrap;
-import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.argparse4j.inf.Namespace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Parses and validates the application's configuration.
  *
  * @param <T> the {@link Configuration} subclass which is loaded from the configuration file
  */
-@Slf4j
 public class CheckConfigurationCommand<T extends Configuration> extends ConfiguredCommand<T> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CheckConfigurationCommand.class);
 
   private final Class<T> configurationClass;
 

@@ -1,8 +1,14 @@
 package dev.mck.mvnmon.util;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 import de.pdark.decentxml.Attribute;
 import de.pdark.decentxml.Document;
 import de.pdark.decentxml.Element;
+import dev.mck.mvnmon.api.maven.ArtifactUpdate;
+import dev.mck.mvnmon.api.maven.Dependency;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,18 +16,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import lombok.extern.slf4j.Slf4j;
-import dev.mck.mvnmon.api.maven.ArtifactUpdate;
-import dev.mck.mvnmon.api.maven.Dependency;
 import java.util.stream.Collectors;
 import org.apache.maven.artifact.versioning.ComparableVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public enum PomFiles {
   INSTANCE;
 
+  private static final Logger LOG = LoggerFactory.getLogger(PomFiles.class);
+
   public static final Pattern MVNMON_IGNORE_COMMENT_PATTERN =
-      Pattern.compile("<!--\s+mvnmon:ignore\s+-->");
+      Pattern.compile("<!-- +mvnmon:ignore +-->");
 
   public static Collection<Dependency> getDependencies(Document doc) {
     Element rootElement = doc.getRootElement();
@@ -123,7 +129,7 @@ public enum PomFiles {
       throw new IllegalStateException(
           "properties="
               + propertyChanges
-              + " need to be updated; but this POM doesn't have a properties block!");
+              + " need to be updated; but this POM doesn\'t have a properties block!");
     }
     for (var entry : propertyChanges.entrySet()) {
       String propertyName = entry.getKey();
@@ -136,63 +142,79 @@ public enum PomFiles {
     return update;
   }
 
-    /**
-     * Determine what the new version for an artifact is (if any) from a list of latest versions.
-     *
-     * @param currentVersion
-     * @param latestVersions crawled latest versions; assumed to be in descending order of upload
-     *     timestamp.
-     * @return new version, if one was determined.
-     */
-    public static final Optional<String> getNewVersion(String currentVersion, List<String> latestVersions) {
-        if (latestVersions.isEmpty()) {
-            return Optional.empty();
-        }
-        if (latestVersions.get(0).equals(currentVersion)) {
-            // the current version is the latest version
-            return Optional.empty();
-        }
-        // use maven's version comparison to filter the candidates to those equal or newer.
-        // we (potentially) leave the current version in the mix, to prevent undesirable
-        // qualifier switches, such as from org.postgresql:postgresql 42.2.19 to 42.2.19.jre7
-        ComparableVersion comparableCurrentVersion = new ComparableVersion(currentVersion);
-        List<ComparableVersion> candidateVersions = latestVersions.stream().map(ComparableVersion::new).filter(v -> comparableCurrentVersion.compareTo(v) <= 0).collect(Collectors.toList());
-        switch (candidateVersions.size()) {
-            case 0:
-                // this case should be covered by the equality check early-on in most cases,
-                // but is possible (if artifacts are deleted, for example)
-                // we don't do downgrades!
-                return Optional.empty();
-            case 1:
-                return Optional.of(candidateVersions.get(0).toString());
-            default:
-        // fall through
-        }
-        // calculate a score for each candidate that is its edit distance + its position
-        // in the list (to penalize earlier upload times).
-        // the winning candidate is the one with the lowest score.
-        // any tie is broken by insertion order (i.e. upload time).
-        int minimumScore = Integer.MAX_VALUE;
-        ComparableVersion candidate = null;
-        for (int i = 0; i < candidateVersions.size(); i++) {
-            ComparableVersion currentCandidate = candidateVersions.get(i);
-            int editDistance = LevenshteinDistance.apply(currentVersion, currentCandidate.toString());
-            int score = editDistance + i;
-            if (score < minimumScore) {
-                minimumScore = score;
-                candidate = currentCandidate;
-            }
-        }
-        if (candidate == null) {
-            // something has gone horribly wrong
-            throw new IllegalStateException("no candidate was chosen during the scoring process; this should never happen!");
-        }
-        // we potentially left the current version in the mix, so need to check for it here.
-        if (comparableCurrentVersion.equals(candidate)) {
-            return Optional.empty();
-        }
-        return Optional.of(candidate.toString());
+  /**
+   * Determine what the new version for an artifact is (if any) from a list of latest versions.
+   *
+   * @param currentVersion
+   * @param latestVersions crawled latest versions; assumed to be in descending order of upload
+   *     timestamp.
+   * @return new version, if one was determined.
+   */
+  public static final Optional<String> getNewVersion(
+      String currentVersion, List<String> latestVersions) {
+    if (latestVersions.isEmpty()) {
+      return Optional.empty();
     }
+    if (latestVersions.get(0).equals(currentVersion)) {
+      // the current version is the latest version
+      return Optional.empty();
+    }
+    // use maven's version comparison to filter the candidates to those equal or newer.
+    // we (potentially) leave the current version in the mix, to prevent undesirable
+    // qualifier switches, such as from org.postgresql:postgresql 42.2.19 to 42.2.19.jre7
+    ComparableVersion comparableCurrentVersion = new ComparableVersion(currentVersion);
+    List<ComparableVersion> candidateVersions =
+        latestVersions.stream()
+            .map(ComparableVersion::new)
+            .filter(v -> comparableCurrentVersion.compareTo(v) <= 0)
+            .collect(Collectors.toList());
+    switch (candidateVersions.size()) {
+      case 0:
+        // this case should be covered by the equality check early-on in most cases,
+        // but is possible (if artifacts are deleted, for example)
+        // we don't do downgrades!
+        return Optional.empty();
+      case 1:
+        return Optional.of(candidateVersions.get(0).toString());
+      default:
+    }
+    // fall through
+    // calculate a score for each candidate that is its edit distance + its position
+    // in the list (to penalize earlier upload times).
+    // the winning candidate is the one with the lowest score.
+    // any tie is broken by insertion order (i.e. upload time).
+    int minimumScore = Integer.MAX_VALUE;
+    ComparableVersion candidate = null;
+    for (int i = 0; i < candidateVersions.size(); i++) {
+      ComparableVersion currentCandidate = candidateVersions.get(i);
+      int editDistance = LevenshteinDistance.apply(currentVersion, currentCandidate.toString());
+      int score = editDistance + i;
+      if (score < minimumScore) {
+        minimumScore = score;
+        candidate = currentCandidate;
+      }
+    }
+    if (candidate == null) {
+      // something has gone horribly wrong
+      throw new IllegalStateException(
+          "no candidate was chosen during the scoring process; this should never happen!");
+    }
+    // we potentially left the current version in the mix, so need to check for it here.
+    if (comparableCurrentVersion.equals(candidate)) {
+      return Optional.empty();
+    }
+    return Optional.of(candidate.toString());
+  }
+
+  public static long hashDependencies(Collection<Dependency> dependencies) {
+    var sortedNames =
+        dependencies.stream().map(d -> d.getGroupId() + d.getArtifactId()).sorted().toList();
+    Hasher hash = Hashing.farmHashFingerprint64().newHasher();
+    for (String name : sortedNames) {
+      hash.putString(name, UTF_8);
+    }
+    return hash.hash().asLong();
+  }
 
   private static class GroupArtifactLookupTable {
     private final Map<String, ArtifactUpdate> map;
@@ -204,7 +226,7 @@ public enum PomFiles {
             String.join(":", artifactUpdate.getGroupId(), artifactUpdate.getArtifactId());
         ArtifactUpdate conflict = map.putIfAbsent(groupArtifact, artifactUpdate);
         if (conflict != null) {
-          throw new IllegalArgumentException("conflict on groupArtifact='" + groupArtifact + "'");
+          throw new IllegalArgumentException("conflict on groupArtifact=\'" + groupArtifact + "\'");
         }
       }
     }

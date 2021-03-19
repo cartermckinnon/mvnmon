@@ -1,0 +1,59 @@
+# Example composition of frontend, backend, nats, and postgres.
+# You must specify MVNMON_WEBHOOK_SECRET and MVNMON_APP_ID,
+# and generate a private key at configuration/private-key.der.
+# See scripts/convert-private-key.sh for more information.
+
+---
+version: '3'
+
+services:
+  nats:
+    image: nats
+    ports:
+      - "4222:4222"
+
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+
+  frontend:
+    image: mckdev/mvnmon
+    build: .
+    command:
+      - "frontend"
+      - "/configuration.yaml"
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      - nats
+      - postgres
+    volumes:
+      - ./configuration/frontend.yaml:/configuration.yaml
+    environment:
+      MVNMON_NATS_SERVER: "nats:4222"
+      MVNMON_WEBHOOK_SECRET: "secret"
+
+  backend:
+    image: mckdev/mvnmon
+    build: .
+    command:
+      - "backend"
+      - "/configuration.yaml"
+    ports:
+      - "8082:8082"
+      - "8083:8083"
+    depends_on:
+      - nats
+    volumes:
+      - ./configuration/backend.yaml:/configuration.yaml
+      - ./configuration/private-key.der:/private-key.der
+    environment:
+      MVNMON_NATS_SERVER: "nats:4222"
+      MVNMON_POSTGRES_SERVER: "postgres:5432"
+      MVNMON_PRIVATE_KEY_FILE: "/private-key.der"
+      MVNMON_APP_ID: "123456"

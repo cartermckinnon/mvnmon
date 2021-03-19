@@ -1,4 +1,4 @@
-FROM adoptopenjdk:15-jdk AS builder
+FROM adoptopenjdk:16-jdk AS builder
 RUN apt-get update && apt-get install maven binutils -y
 WORKDIR /workdir
 ADD pom.xml pom.xml
@@ -7,7 +7,7 @@ ADD lombok.config lombok.config
 ADD src/ src/
 RUN mvn package -DskipTests
 
-FROM adoptopenjdk:15-jre
+FROM adoptopenjdk:16-jre
 WORKDIR /mvnmon
 COPY --from=builder /workdir/target/lib/ /mvnmon/lib/
 COPY --from=builder /workdir/target/mvnmon*.jar /mvnmon/mvnmon.jar

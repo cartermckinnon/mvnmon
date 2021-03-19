@@ -1,22 +1,13 @@
 package dev.mck.mvnmon.api.github;
 
-import static java.util.stream.Collectors.toList;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.dropwizard.jackson.Jackson;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import com.google.common.base.MoreObjects;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
 
 /**
  * Represents (selective fields of) a GitHub webhook "push" event.
@@ -208,24 +199,39 @@ import lombok.ToString;
  *
  * @author carter
  */
-@Getter
-@ToString
-@EqualsAndHashCode
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PushEvent {
 
-  private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
+  @JsonProperty("ref")
+  private String ref;
 
-  private final String ref;
-  private final Repository repository;
-  private final List<Commit> commits;
+  @JsonProperty("repository")
+  private Repository repository;
 
-  public PushEvent(
-      @JsonProperty("ref") String ref,
-      @JsonProperty("repository") Repository repository,
-      @JsonProperty("commits") List<Commit> commits) {
+  @JsonProperty("commits")
+  private List<Commit> commits;
+
+  public String getRef() {
+    return ref;
+  }
+
+  public Repository getRepository() {
+    return repository;
+  }
+
+  public List<Commit> getCommits() {
+    return commits;
+  }
+
+  public void setRef(String ref) {
     this.ref = ref;
+  }
+
+  public void setRepository(Repository repository) {
     this.repository = repository;
+  }
+
+  public void setCommits(List<Commit> commits) {
     this.commits = commits;
   }
 
@@ -245,21 +251,8 @@ public class PushEvent {
     return false;
   }
 
-  public byte[] toBytes() {
-    try {
-      return MAPPER.writeValueAsBytes(this);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException("failed to serialize to bytes!", e);
-    }
-  }
-
-  /**
-   * @return URLs for the raw content of added and modified POM files in this commit. The URLs look
-   *     like: {@code
-   *     https://raw.githubusercontent.com/cartermckinnon/mvnmon/4b73f50417b9da14277eac73a2cb84d455ab3d74/README.md}.
-   */
   @JsonIgnore
-  public List<URL> getPomRawUrls() {
+  public Set<String> getPomPaths() {
     Set<String> poms = new HashSet<>();
     for (Commit commit : commits) {
       for (String addedFile : commit.getAdded()) {
@@ -273,29 +266,45 @@ public class PushEvent {
         }
       }
     }
-    return poms.stream().map(this::rawUrl).collect(toList());
+    return poms;
   }
 
-  /**
-   * @param file in this commit.
-   * @return url for raw file content.
-   */
-  private URL rawUrl(String file) {
-    try {
-      return new URL(
-          String.format(
-              "https://raw.githubusercontent.com/%s/%s/%s",
-              repository.getName(), repository.getDefaultBranch(), file));
-    } catch (MalformedURLException e) {
-      throw new RuntimeException("raw URL is malformed!", e);
-    }
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("ref", ref)
+        .add("repository", repository)
+        .add("commits", commits)
+        .toString();
   }
 
-  public static final PushEvent parse(byte[] json) {
-    try {
-      return MAPPER.readValue(json, PushEvent.class);
-    } catch (IOException e) {
-      throw new IllegalArgumentException("failed to deserialize!", e);
+  @Override
+  public int hashCode() {
+    int hash = 3;
+    hash = 13 * hash + Objects.hashCode(this.ref);
+    hash = 13 * hash + Objects.hashCode(this.repository);
+    hash = 13 * hash + Objects.hashCode(this.commits);
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
     }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final PushEvent other = (PushEvent) obj;
+    if (!Objects.equals(this.ref, other.ref)) {
+      return false;
+    }
+    if (!Objects.equals(this.repository, other.repository)) {
+      return false;
+    }
+    return Objects.equals(this.commits, other.commits);
   }
 }

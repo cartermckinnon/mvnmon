@@ -37,6 +37,99 @@ databaseChangeLog:
             tableName: "artifacts"
 
         - createTable:
+            tableName: "installations"
+            columns:
+              - column:
+                  name: "id"
+                  type: "bigint"
+                  constraints:
+                    unique: "true"
+                    primaryKey: "true"
+                    nullable: "false"
+              - column:
+                  name: "login"
+                  type: "varchar(256)"
+                  constraints:
+                    nullable: "false"
+              - column:
+                  name: "token"
+                  type: "varchar(256)"
+                  constraints:
+                    nullable: "false"
+                    
+        - createTable:
+            tableName: "repositories"
+            columns:
+              - column:
+                  name: "id"
+                  type: "bigint"
+                  constraints:
+                    unique: "true"
+                    primaryKey: "true"
+                    nullable: "false"
+              - column:
+                  name: "name"
+                  type: "varchar(256)"
+                  constraints:
+                    unique: "true"
+                    nullable: "false"
+              - column:
+                  name: "installation_id"
+                  type: "bigint"
+                  constraints:
+                    nullable: "false"
+
+        - addForeignKeyConstraint:
+            baseColumnNames: "installation_id"
+            baseTableName: "repositories"
+            constraintName: "fk_installation_id"
+            referencedColumnNames: "id"
+            referencedTableName: "installations"
+            validate: "true"
+            onDelete: "CASCADE"
+
+        - createTable:
+            tableName: "poms"
+            columns:
+              - column:
+                  name: "id"
+                  type: "bigint"
+                  autoIncrement: "true"
+                  constraints:
+                    primaryKey: "true"
+                    nullable: "false"
+              - column:
+                  name: "repository_id"
+                  type: "bigint"
+                  constraints:
+                    nullable: "false"
+              - column:
+                  name: "path"
+                  type: "varchar(256)"
+                  constraints:
+                    nullable: "false"
+              - column:
+                  name: "dependency_hash"
+                  type: "bigint"
+                  constraints:
+                    nullable: "false"
+
+        # combinations of repository_id, path must be unique
+        - addUniqueConstraint:
+            columnNames: "repository_id, path"
+            constraintName: "repository_id_path"
+            tableName: "poms"
+
+        - addForeignKeyConstraint:
+            baseColumnNames: "repository_id"
+            baseTableName: "poms"
+            constraintName: "fk_repository_id"
+            referencedColumnNames: "id"
+            referencedTableName: "repositories"
+            validate: "true"
+            onDelete: "CASCADE"
+
+        - createTable:
             tableName: "consumers"
             columns:
               - column:
@@ -47,13 +140,9 @@ databaseChangeLog:
                     primaryKey: "true"
                     nullable: "false"
               - column:
-                  name: "repository"
-                  type: "varchar(256)"
-                  constraints:
-                    nullable: "false"
-              - column:
-                  name: "pom"
-                  type: "varchar(256)"
+                  name: "pom_id"
+                  type: "bigint"
+                  autoIncrement: "true"
                   constraints:
                     nullable: "false"
               - column:
@@ -74,10 +163,10 @@ databaseChangeLog:
 
         # combinations of repository, pom, group_id, artifact_id must be unique
         - addUniqueConstraint:
-            columnNames: "repository, pom, group_id, artifact_id"
-            constraintName: "repository_pom_group_id_artifact_id"
+            columnNames: "pom_id, group_id, artifact_id"
+            constraintName: "pom_id_group_id_artifact_id"
             tableName: "consumers"
-        
+
         - addForeignKeyConstraint:
             baseColumnNames: "group_id, artifact_id"
             baseTableName: "consumers"
@@ -85,3 +174,13 @@ databaseChangeLog:
             referencedColumnNames: "group_id, artifact_id"
             referencedTableName: "artifacts"
             validate: "true"
+            onDelete: "CASCADE"
+
+        - addForeignKeyConstraint:
+            baseColumnNames: "pom_id"
+            baseTableName: "consumers"
+            constraintName: "fk_pom_id"
+            referencedColumnNames: "id"
+            referencedTableName: "poms"
+            validate: "true"
+            onDelete: "CASCADE"

@@ -3,7 +3,7 @@ package dev.mck.mvnmon.cmd.pom;
 import de.pdark.decentxml.Document;
 import dev.mck.mvnmon.api.maven.ArtifactUpdate;
 import dev.mck.mvnmon.api.maven.Dependency;
-import dev.mck.mvnmon.cmd.crawler.CrawlerUtils;
+import dev.mck.mvnmon.cmd.backend.crawler.CrawlerUtils;
 import dev.mck.mvnmon.util.PaddedStringBuilder;
 import dev.mck.mvnmon.util.PomFiles;
 import dev.mck.mvnmon.util.XmlFiles;
@@ -34,7 +34,7 @@ public class UpdateDependenciesCommand extends Command {
   @Override
   public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
     File pomFile = (File) namespace.get("pomFilePath");
-    Document doc = XmlFiles.parseXmlFile(pomFile);
+    Document doc = XmlFiles.parse(pomFile);
     Collection<Dependency> dependencies = PomFiles.getDependencies(doc);
 
     Collection<ArtifactUpdate> updates = new ArrayList<>();

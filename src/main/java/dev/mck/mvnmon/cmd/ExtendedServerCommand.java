@@ -4,19 +4,21 @@ import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.setup.Environment;
-import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.argparse4j.inf.Namespace;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
 import org.eclipse.jetty.util.component.LifeCycle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Extends the Dropwizard 'server' command to allow multiple such commands per Application.
  *
  * @param <T> the {@link Configuration} subclass which is loaded from the configuration file
  */
-@Slf4j
 public abstract class ExtendedServerCommand<T extends Configuration> extends EnvironmentCommand<T> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ExtendedServerCommand.class);
 
   private final Class<T> configurationClass;
 

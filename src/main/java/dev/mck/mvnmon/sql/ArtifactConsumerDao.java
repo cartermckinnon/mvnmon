@@ -17,9 +17,9 @@ import org.jdbi.v3.sqlobject.statement.UseRowMapper;
 public interface ArtifactConsumerDao {
 
   public static final String UPSERT_QUERY =
-      "INSERT INTO consumers (repository, pom, group_id, artifact_id, current_version)"
-          + " VALUES (:repository, :pom, :groupId, :artifactId, :currentVersion)"
-          + " ON CONFLICT ON CONSTRAINT repository_pom_group_id_artifact_id"
+      "INSERT INTO consumers (pom_id, group_id, artifact_id, current_version)"
+          + " VALUES (:pomId, :groupId, :artifactId, :currentVersion)"
+          + " ON CONFLICT ON CONSTRAINT pom_id_group_id_artifact_id"
           + " DO UPDATE SET current_version = :currentVersion";
 
   /**
@@ -30,6 +30,13 @@ public interface ArtifactConsumerDao {
   @SqlUpdate(UPSERT_QUERY)
   public void upsert(@BindFields ArtifactConsumer consumer);
 
+  @SqlUpdate(UPSERT_QUERY)
+  public void upsert(
+      @Bind("pom_id") long pomId,
+      @Bind("group_id") String groupId,
+      @Bind("artifactId") String artifactId,
+      @Bind("currentVersion") String currentVersion);
+
   /**
    * Insert a batch of artifact consumers, updating them if they already exist.
    *
@@ -38,25 +45,26 @@ public interface ArtifactConsumerDao {
   @SqlBatch(UPSERT_QUERY)
   public void upsert(@BindFields Collection<ArtifactConsumer> consumers);
 
+  @SqlQuery("SELECT * FROM consumers LIMIT :limit")
+  @UseRowMapper(ArtifactConsumerRowMapper.class)
+  public List<ArtifactConsumer> get(@Bind("limit") int limit);
+
   /**
    * Get an artifact consumer.
    *
-   * @param repository
-   * @param pom
+   * @param pomId
    * @param groupId
    * @param artifactId
    * @return the MavenArtifact, if it exists.
    */
   @SqlQuery(
       "SELECT * FROM consumers"
-          + " WHERE repository = :repository"
-          + " AND pom = :pom"
+          + " WHERE pom_id = :pomId"
           + " AND group_id = :groupId"
           + " AND artifact_id = :artifactId")
   @UseRowMapper(ArtifactConsumerRowMapper.class)
   public Optional<ArtifactConsumer> get(
-      @Bind("repository") String repository,
-      @Bind("pom") String pom,
+      @Bind("pomId") long pomId,
       @Bind("groupId") String groupId,
       @Bind("artifactId") String artifactId);
 
@@ -85,8 +93,7 @@ public interface ArtifactConsumerDao {
 
   public static final String UPDATE_CURRENT_VERSION_QUERY =
       "UPDATE consumers SET current_version = :currentVersion"
-          + " WHERE repository = :repository"
-          + " AND pom = :pom"
+          + " WHERE pom_id = :pomId"
           + " AND group_id = :groupId "
           + " AND artifact_id = :artifactId";
 
@@ -107,6 +114,6 @@ public interface ArtifactConsumerDao {
   public void updateCurrentVersion(@BindFields Collection<ArtifactConsumer> consumers);
 
   /** Delete all the artifact consumers for a (repository, pom) pair. */
-  @SqlUpdate("DELETE FROM consumers WHERE repository = :repository AND pom = :pom")
-  public void delete(@Bind("repository") String repository, @Bind("pom") String pom);
+  @SqlUpdate("DELETE FROM consumers WHERE pom_id = pomId")
+  public void delete(@Bind("pomId") String pomId);
 }

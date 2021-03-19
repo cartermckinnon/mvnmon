@@ -1,0 +1,14 @@
+---
+server:
+  applicationConnectors:
+    - type: "http"
+      port: ${MVNMON_APPLICATION_PORT:-8080}
+  adminConnectors:
+    - type: "http"
+      port: ${MVNMON_ADMIN_PORT:-8081}
+
+nats:
+  servers:
+    - "${MVNMON_NATS_SERVER:-localhost:4222}"
+
+secret: "${MVNMON_WEBHOOK_SECRET}"

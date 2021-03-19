@@ -3,10 +3,12 @@ package dev.mck.mvnmon.nats;
 import io.dropwizard.lifecycle.Managed;
 import io.nats.client.Connection;
 import java.time.Duration;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class NatsManager implements Managed {
+
+  private static final Logger LOG = LoggerFactory.getLogger(NatsManager.class);
 
   private final Connection c;
 

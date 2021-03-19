@@ -1,0 +1,34 @@
+---
+server:
+  applicationConnectors:
+    - type: "http"
+      port: ${MVNMON_APPLICATION_PORT:-8082}
+  adminConnectors:
+    - type: "http"
+      port: ${MVNMON_ADMIN_PORT:-8083}
+
+db:
+  driverClass: org.postgresql.Driver
+  url: "jdbc:postgresql://${MVNMON_POSTGRES_SERVER:-localhost:5432}/"
+  user: "${MVNMON_POSTGRES_USER:-user}"
+  password: "${MVNMON_POSTGRES_PASSWORD:-password}"
+
+nats:
+  servers:
+    - "${MVNMON_NATS_SERVER:-localhost:4222}"
+
+appId: ${MVNMON_APP_ID}
+privateKeyFile: "${MVNMON_PRIVATE_KEY_FILE:-configuration/private-key.der}"
+
+pullRequester:
+  batchSize: 10
+
+updater:
+  batchSize: 100
+  interval: "10 seconds"
+
+crawler:
+  maxConcurrentRequests: 32
+
+scheduler:
+  batchSize: 100

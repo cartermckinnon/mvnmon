@@ -29,7 +29,7 @@ public class DependenciesCommand extends Command {
   @Override
   public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
     URL url = (URL) namespace.get("url");
-    Document doc = XmlFiles.parseXmlFile(url);
+    Document doc = XmlFiles.parse(url);
     Collection<Dependency> dependencies = PomFiles.getDependencies(doc);
     int groupLen = 7; // 'GROUPID'
     int artifactLen = 10; // 'ARTIFACTID'

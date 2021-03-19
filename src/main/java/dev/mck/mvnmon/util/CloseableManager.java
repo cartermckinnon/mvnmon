@@ -2,10 +2,12 @@ package dev.mck.mvnmon.util;
 
 import io.dropwizard.lifecycle.Managed;
 import java.io.Closeable;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class CloseableManager implements Managed {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CloseableManager.class);
 
   private final Closeable closeable;
 

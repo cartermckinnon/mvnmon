@@ -1,11 +1,14 @@
 package dev.mck.mvnmon.util;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import de.pdark.decentxml.Attribute;
 import de.pdark.decentxml.Document;
 import de.pdark.decentxml.Element;
 import de.pdark.decentxml.XMLParser;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -40,18 +43,29 @@ public enum XmlFiles {
     return element.getChild(elementName);
   }
 
-  public static Document parseXmlFile(URL pomFileUrl) throws IOException {
+  public static Document parse(URL pomFileUrl) throws IOException {
     byte[] bytes = pomFileUrl.openStream().readAllBytes();
     String xml = new String(bytes, StandardCharsets.UTF_8);
     return XMLParser.parse(xml);
   }
 
-  public static Document parseXmlFile(File pomFile) throws IOException {
+  public static Document parse(File pomFile) throws IOException {
     return XMLParser.parse(pomFile);
   }
 
-  public static Document parseXmlFile(String xml) {
+  public static Document parse(String xml) {
     return XMLParser.parse(xml);
+  }
+
+  public static Document parse(InputStream is) {
+    byte[] bytes;
+    try {
+      bytes = is.readAllBytes();
+    } catch (IOException e) {
+      throw new RuntimeException("failed to read XML bytes!", e);
+    }
+    String xml = new String(bytes, UTF_8);
+    return XmlFiles.parse(xml);
   }
 
   public static boolean updateFirstChild(Element parentElement, String elementName, String value) {

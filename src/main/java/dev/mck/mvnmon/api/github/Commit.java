@@ -2,18 +2,14 @@ package dev.mck.mvnmon.api.github;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
+import dev.mck.mvnmon.util.Strings;
 import java.net.URI;
 import java.util.List;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import dev.mck.mvnmon.util.Strings;
+import java.util.Objects;
 import org.joda.time.DateTime;
 
 /** Represents a commit in a GitHub webhook 'push' event. */
-@Getter
-@ToString
-@EqualsAndHashCode
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Commit {
   private final String id;
@@ -58,5 +54,101 @@ public class Commit {
       }
     }
     return false;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public List<String> getAdded() {
+    return added;
+  }
+
+  public List<String> getRemoved() {
+    return removed;
+  }
+
+  public List<String> getModified() {
+    return modified;
+  }
+
+  public Author getAuthor() {
+    return author;
+  }
+
+  public Author getCommitter() {
+    return committer;
+  }
+
+  public String getRepositoryName() {
+    return repositoryName;
+  }
+
+  public DateTime getTimestamp() {
+    return timestamp;
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("id", id)
+        .add("added", added)
+        .add("removed", removed)
+        .add("modified", modified)
+        .add("author", author)
+        .add("committer", committer)
+        .add("repositoryName", repositoryName)
+        .add("timestamp", timestamp)
+        .toString();
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 5;
+    hash = 67 * hash + Objects.hashCode(this.id);
+    hash = 67 * hash + Objects.hashCode(this.added);
+    hash = 67 * hash + Objects.hashCode(this.removed);
+    hash = 67 * hash + Objects.hashCode(this.modified);
+    hash = 67 * hash + Objects.hashCode(this.author);
+    hash = 67 * hash + Objects.hashCode(this.committer);
+    hash = 67 * hash + Objects.hashCode(this.repositoryName);
+    hash = 67 * hash + Objects.hashCode(this.timestamp);
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final Commit other = (Commit) obj;
+    if (!Objects.equals(this.id, other.id)) {
+      return false;
+    }
+    if (!Objects.equals(this.repositoryName, other.repositoryName)) {
+      return false;
+    }
+    if (!Objects.equals(this.added, other.added)) {
+      return false;
+    }
+    if (!Objects.equals(this.removed, other.removed)) {
+      return false;
+    }
+    if (!Objects.equals(this.modified, other.modified)) {
+      return false;
+    }
+    if (!Objects.equals(this.author, other.author)) {
+      return false;
+    }
+    if (!Objects.equals(this.committer, other.committer)) {
+      return false;
+    }
+    return Objects.equals(this.timestamp, other.timestamp);
   }
 }
