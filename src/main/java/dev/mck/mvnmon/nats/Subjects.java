@@ -11,6 +11,6 @@ public class Subjects {
   }
 
   public static final String hook(String event, String action) {
-    return String.join("-", event, action);
+    return String.join("-", "hook", event, action);
   }
 }
