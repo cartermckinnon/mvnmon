@@ -3,14 +3,12 @@ package dev.mck.mvnmon.cmd.backend.webhooks;
 import dev.mck.mvnmon.api.github.InstallationRepositoriesRemovedEvent;
 import dev.mck.mvnmon.api.github.Repository;
 import dev.mck.mvnmon.sql.RepositoryDao;
-import dev.mck.mvnmon.util.Serialization;
-import io.nats.client.Message;
-import io.nats.client.MessageHandler;
 import org.jdbi.v3.core.Jdbi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InstallationRepositoriesRemovedEventHandler implements MessageHandler {
+public class InstallationRepositoriesRemovedEventHandler
+    extends TypedHandler<InstallationRepositoriesRemovedEvent> {
 
   private static final Logger LOG =
       LoggerFactory.getLogger(InstallationRepositoriesRemovedEventHandler.class);
@@ -18,13 +16,12 @@ public class InstallationRepositoriesRemovedEventHandler implements MessageHandl
   private final Jdbi jdbi;
 
   public InstallationRepositoriesRemovedEventHandler(Jdbi jdbi) {
+    super(InstallationRepositoriesRemovedEvent.class);
     this.jdbi = jdbi;
   }
 
   @Override
-  public void onMessage(Message msg) throws InterruptedException {
-    var event =
-        Serialization.deserialize(msg.getData(), InstallationRepositoriesRemovedEvent.class);
+  protected void handlePayload(InstallationRepositoriesRemovedEvent event) {
     var dao = jdbi.onDemand(RepositoryDao.class);
     for (Repository repository : event.getRepositoriesRemoved()) {
       dao.delete(repository.getId());

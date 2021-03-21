@@ -11,10 +11,7 @@ import dev.mck.mvnmon.sql.ArtifactDao;
 import dev.mck.mvnmon.sql.PomDao;
 import dev.mck.mvnmon.sql.RepositoryDao;
 import dev.mck.mvnmon.util.PomFiles;
-import dev.mck.mvnmon.util.Serialization;
 import dev.mck.mvnmon.util.XmlFiles;
-import io.nats.client.Message;
-import io.nats.client.MessageHandler;
 import java.io.IOException;
 import java.util.Set;
 import org.jdbi.v3.core.Jdbi;
@@ -26,28 +23,23 @@ import org.slf4j.LoggerFactory;
 /**
  * Receives GitHub webhook "push" events for POM changes, creating artifact consumers accordingly.
  */
-public class PushEventHandler implements MessageHandler {
+public class PushEventHandler extends TypedHandler<PushEvent> {
 
   private static final Logger LOG = LoggerFactory.getLogger(PushEventHandler.class);
 
   private final Jdbi jdbi;
 
   public PushEventHandler(Jdbi jdbi) {
+    super(PushEvent.class);
     this.jdbi = jdbi;
   }
 
-  public void onMessage(Message msg) throws InterruptedException {
-    PushEvent event = Serialization.deserialize(msg.getData(), PushEvent.class);
-    if (event.isToDefaultBranch()) {
-      try {
-        updatePoms(event);
-      } catch (Exception e) {
-        LOG.error("failed to update poms for pushEvent={}", event, e);
-      }
+  @Override
+  protected void handlePayload(PushEvent event) throws Exception {
+    if (!event.isToDefaultBranch()) {
+      return;
     }
-  }
 
-  public void updatePoms(PushEvent event) throws Exception {
     var repositoryDao = jdbi.onDemand(RepositoryDao.class);
     String token = repositoryDao.getToken(event.getRepository().getId());
     GitHub github = GitHub.connectUsingOAuth(token);

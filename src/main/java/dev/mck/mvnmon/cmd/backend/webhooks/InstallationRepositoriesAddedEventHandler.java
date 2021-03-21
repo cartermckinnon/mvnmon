@@ -1,29 +1,32 @@
 package dev.mck.mvnmon.cmd.backend.webhooks;
 
+import dev.mck.mvnmon.api.github.Installation;
 import dev.mck.mvnmon.api.github.InstallationRepositoriesAddedEvent;
+import dev.mck.mvnmon.api.github.Repository;
 import dev.mck.mvnmon.sql.InstallationDao;
+import dev.mck.mvnmon.util.Pair;
+import java.util.Collection;
 import org.jdbi.v3.core.Jdbi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class InstallationRepositoriesAddedEventHandler
     extends RepositoryInitHandler<InstallationRepositoriesAddedEvent> {
-
-  private static final Logger LOG =
-      LoggerFactory.getLogger(InstallationRepositoriesAddedEventHandler.class);
 
   public InstallationRepositoriesAddedEventHandler(Jdbi jdbi) {
     super(InstallationRepositoriesAddedEvent.class, jdbi);
   }
 
   @Override
-  public void handleEvent(InstallationRepositoriesAddedEvent event) throws Exception {
-    var dao = getJdbi().onDemand(InstallationDao.class);
-    String token = dao.getToken(event.getInstallation().getId());
-    processPoms(event.getInstallation(), event.getRepositoriesAdded(), token);
-    LOG.info(
-        "added repositories={} installation={}",
-        event.getRepositoriesAdded().size(),
-        event.getInstallation().getId());
+  protected Pair<Installation, String> getInstallationAndToken(
+      InstallationRepositoriesAddedEvent event) {
+    var token = getJdbi().onDemand(InstallationDao.class).getToken(event.getInstallation().getId());
+    if (token == null) {
+      throw new IllegalStateException("failed to get installation token for event=" + event);
+    }
+    return new Pair<>(event.getInstallation(), token);
+  }
+
+  @Override
+  protected Collection<Repository> getRepositories(InstallationRepositoriesAddedEvent event) {
+    return event.getRepositoriesAdded();
   }
 }
