@@ -20,6 +20,12 @@ cp -R target/lib/* dist/$DIST/extlib/
 cp -R doc/ dist/$DIST/doc
 cp src/main/bin/mvnmon dist/$DIST/bin/
 
-# archive
-zip -r dist/$DIST.zip dist/$DIST
-tar -pczf dist/$DIST.tar.gz dist/$DIST
+# pack (optionally)
+if [ "$#" -eq 1 ] && [ "$1" = "pack" ]
+then
+  cd dist/
+  zip -r $DIST.zip $DIST
+  sha512sum $DIST.zip > $DIST.zip.sha512
+  tar -pczf $DIST.tar.gz $DIST
+  sha512sum $DIST.tar.gz > $DIST.tar.gz.sha512
+fi
