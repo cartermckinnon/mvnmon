@@ -13,7 +13,7 @@ public class FrontendCommand extends ExtendedServerCommand<FrontendConfiguration
     super(
         new NoopApplication<>("frontend", FrontendConfiguration.class),
         "frontend",
-        "Webhook server to receive GitHub events.");
+        "Server to receive GitHub webhook events.");
   }
 
   @Override

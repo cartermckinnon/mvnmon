@@ -57,4 +57,33 @@ public class ArtifactDaoTest extends DaoTest {
         .asList()
         .containsExactly("newVersion", "newVersion2");
   }
+
+  @Test
+  public void deleteIfNoConsumers() {
+    var dao = getJdbi().onDemand(ArtifactDao.class);
+
+    Artifact artifactA = new Artifact("groupIdA", "artifactIdA", "version");
+    Artifact artifactB = new Artifact("groupIdB", "artifactIdB", "version");
+
+    dao.insert(artifactA);
+    dao.insert(artifactB);
+
+    // both should be deleted when consumers table is empty
+    assertThat(dao.deleteArtifactsWithoutConsumers()).isEqualTo(2);
+    assertThat(dao.get("groupIdA", "artifactIdA")).isEmpty();
+    assertThat(dao.get("groupIdB", "artifactIdB")).isEmpty();
+
+    dao.insert(artifactA);
+    dao.insert(artifactB);
+
+    getJdbi().onDemand(InstallationDao.class).insert(0, "login", "token");
+    getJdbi().onDemand(RepositoryDao.class).insert(0, "name", 0);
+    long pomId = getJdbi().onDemand(PomDao.class).insert(0, "path", 0);
+    getJdbi().onDemand(ArtifactConsumerDao.class).upsert(pomId, "groupIdA", "artifactIdA", "version");
+
+    // B should be deleted because it had no consumers
+    assertThat(dao.deleteArtifactsWithoutConsumers()).isEqualTo(1);
+    assertThat(dao.get("groupIdA", "artifactIdA")).isPresent();
+    assertThat(dao.get("groupIdB", "artifactIdB")).isEmpty();
+  }
 }

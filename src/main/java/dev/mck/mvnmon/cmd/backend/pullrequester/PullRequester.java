@@ -85,7 +85,7 @@ public class PullRequester implements Runnable {
       repository.createRef("refs/heads/" + branch, commit.getSHA1());
       repository.createPullRequest(
           title, branch, repository.getDefaultBranch(), body(consumer, newVersion));
-      LOG.info("created pull request for consumer={} for version={}", consumer, newVersion);
+      LOG.info("created pull request for consumer={} newVersion={}", consumer, newVersion);
     }
   }
 

@@ -15,7 +15,7 @@ import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Receives GitHub webhook "push" events. */
+/** Receives GitHub webhook events. */
 @Path("/webhooks")
 public class WebhookResource {
 
@@ -33,7 +33,9 @@ public class WebhookResource {
    * Forwards (valid) webhook events to NATS.
    *
    * @param signatureHeader
+     * @param guid
    * @param payload
+     * @param event
    */
   @POST
   public void receive(
@@ -43,11 +45,13 @@ public class WebhookResource {
       @NotNull byte[] payload) {
     LOG.info("guid={}, event={}", guid, event);
     verifyPayload(secret, signatureHeader, payload);
-    if ("push".equals(event)) {
-      nats.publish(Subjects.hook("push"), payload);
-    } else if ("installation".equals(event)) {
-      String action = getActionFromPayload(payload);
-      nats.publish(Subjects.hook(event, action), payload);
+    String subject = switch (event) {
+      case "push" -> Subjects.hook(event);
+      case "installation", "installation_repositories" -> Subjects.hook(event, getActionFromPayload(payload));
+      default -> null;
+    };
+    if(subject != null) {
+        nats.publish(subject, payload);
     }
   }
 

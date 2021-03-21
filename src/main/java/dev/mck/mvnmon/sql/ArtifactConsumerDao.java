@@ -32,8 +32,8 @@ public interface ArtifactConsumerDao {
 
   @SqlUpdate(UPSERT_QUERY)
   public void upsert(
-      @Bind("pom_id") long pomId,
-      @Bind("group_id") String groupId,
+      @Bind("pomId") long pomId,
+      @Bind("groupId") String groupId,
       @Bind("artifactId") String artifactId,
       @Bind("currentVersion") String currentVersion);
 

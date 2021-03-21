@@ -11,10 +11,13 @@ import dev.mck.mvnmon.cmd.backend.pullrequester.PullRequesterMessageHandler;
 import dev.mck.mvnmon.cmd.backend.resources.ArtifactResource;
 import dev.mck.mvnmon.cmd.backend.resources.ConsumerResource;
 import dev.mck.mvnmon.cmd.backend.resources.PomResource;
+import dev.mck.mvnmon.cmd.backend.scheduler.SchedulerTask;
 import dev.mck.mvnmon.cmd.backend.updater.UpdaterMessageHandler;
 import dev.mck.mvnmon.cmd.backend.webhooks.InstallationCreatedEventHandler;
+import dev.mck.mvnmon.cmd.backend.webhooks.InstallationDeletedEventHandler;
+import dev.mck.mvnmon.cmd.backend.webhooks.InstallationRepositoriesAddedEventHandler;
+import dev.mck.mvnmon.cmd.backend.webhooks.InstallationRepositoriesRemovedEventHandler;
 import dev.mck.mvnmon.cmd.backend.webhooks.PushEventHandler;
-import dev.mck.mvnmon.cmd.backend.scheduler.SchedulerTask;
 import dev.mck.mvnmon.nats.DispatcherManager;
 import dev.mck.mvnmon.nats.PingMessageHandler;
 import dev.mck.mvnmon.nats.Subjects;
@@ -88,6 +91,21 @@ public class BackendCommand extends ExtendedServerCommand<BackendConfiguration> 
                     jdbi, configuration.getPrivateKeyFile(), configuration.getAppId()))
             .subscribe(Subjects.hook("installation", "created"), "backend");
     environment.lifecycle().manage(new DispatcherManager(installationCreatedDispatcher));
+    // - installation deleted
+    var installationDeletedDispatcher =
+        nats.createDispatcher(new InstallationDeletedEventHandler(jdbi))
+            .subscribe(Subjects.hook("installation", "deleted"), "backend");
+    environment.lifecycle().manage(new DispatcherManager(installationDeletedDispatcher));
+    // - installation repositories added
+    var repositoriesAddedDispatcher =
+        nats.createDispatcher(new InstallationRepositoriesAddedEventHandler(jdbi))
+            .subscribe(Subjects.hook("installation_repositories", "added"), "backend");
+    environment.lifecycle().manage(new DispatcherManager(repositoriesAddedDispatcher));
+    // - installation repositories removed
+    var repositoriesRemovedDispatcher =
+        nats.createDispatcher(new InstallationRepositoriesRemovedEventHandler(jdbi))
+            .subscribe(Subjects.hook("installation_repositories", "removed"), "backend");
+    environment.lifecycle().manage(new DispatcherManager(repositoriesRemovedDispatcher));
     // end webhook handlers
 
     // ping

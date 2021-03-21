@@ -8,8 +8,12 @@ import com.codahale.metrics.health.HealthCheck;
 import io.nats.client.Connection;
 import java.time.Duration;
 import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PingHealthCheck extends HealthCheck {
+
+  private static final Logger LOG = LoggerFactory.getLogger(PingHealthCheck.class);
 
   private final String subject;
   private final Duration timeout;
@@ -23,9 +27,11 @@ public class PingHealthCheck extends HealthCheck {
 
   @Override
   protected Result check() throws Exception {
-    var reply = nats.request(subject + "-ping", PING, timeout);
+    LOG.info("ping -> {}", subject);
+    var reply = nats.request(subject, PING, timeout);
     if (reply == null) {
-      return Result.unhealthy("no subscribers replied within " + timeout + " second(s)");
+      return Result.unhealthy(
+          "no subscribers replied within " + timeout.toSeconds() + " second(s)");
     } else if (!Arrays.equals(PONG, reply.getData())) {
       return Result.unhealthy(
           "unknown response received: '" + new String(reply.getData(), UTF_8) + "'");

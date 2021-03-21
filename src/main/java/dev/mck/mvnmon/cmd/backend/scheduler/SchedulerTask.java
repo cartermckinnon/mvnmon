@@ -26,11 +26,14 @@ public class SchedulerTask extends Task {
 
   @Override
   public void execute(Map<String, List<String>> parameters, PrintWriter output) throws Exception {
+    final long start = System.currentTimeMillis();
     var dao = jdbi.onDemand(ArtifactDao.class);
+    // remove artifacts that have been orphaned
+    int deletedOrphans = dao.deleteArtifactsWithoutConsumers();
+    // then send all of the remaining to the crawler
     List<ArtifactWithId> results;
     long cursor = 0;
     long n = 0;
-    final long start = System.currentTimeMillis();
     while (true) {
       results = dao.scan(100, cursor);
       if (results.isEmpty()) {
@@ -45,7 +48,10 @@ public class SchedulerTask extends Task {
       }
     }
     final long stop = System.currentTimeMillis();
-    String msg = String.format("scheduled %d id(s) in %d ms", n, (stop - start));
+    String msg =
+        String.format(
+            "deleted %d orphaned artifact(s) and scheduled %d in %d ms",
+            deletedOrphans, n, (stop - start));
     output.write(msg);
   }
 }

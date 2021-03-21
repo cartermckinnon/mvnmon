@@ -77,6 +77,7 @@ public class PushEventHandler implements MessageHandler {
           pomDao.delete(event.getRepository().getId(), pom);
         } else {
           // no dependency changes, we're done here
+          LOG.info("unchanged pom={}", pom);
           continue;
         }
       }
@@ -101,6 +102,12 @@ public class PushEventHandler implements MessageHandler {
               .collect(toList());
       var consumerDao = jdbi.onDemand(ArtifactConsumerDao.class);
       consumerDao.upsert(consumers);
+
+      LOG.info(
+          "created consumers={} pom={} repository={}",
+          consumers.size(),
+          pom,
+          event.getRepository().getName());
     }
   }
 }

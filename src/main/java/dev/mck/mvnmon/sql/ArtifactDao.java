@@ -83,4 +83,11 @@ public interface ArtifactDao {
    */
   @SqlBatch(UPDATE_QUERY)
   public void updateVersions(@BindFields Collection<Artifact> artifacts);
+
+  @SqlUpdate(
+      "DELETE FROM artifacts a "
+          + "WHERE  NOT EXISTS"
+          + "(SELECT FROM consumers c "
+          + " WHERE  c.group_id = a.group_id AND c.artifact_id = a.artifact_id)")
+  public int deleteArtifactsWithoutConsumers();
 }
