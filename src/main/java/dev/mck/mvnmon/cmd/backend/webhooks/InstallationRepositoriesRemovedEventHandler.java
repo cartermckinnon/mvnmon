@@ -1,5 +1,6 @@
 package dev.mck.mvnmon.cmd.backend.webhooks;
 
+import dev.mck.mvnmon.nats.TypedHandler;
 import dev.mck.mvnmon.api.github.InstallationRepositoriesRemovedEvent;
 import dev.mck.mvnmon.api.github.Repository;
 import dev.mck.mvnmon.sql.RepositoryDao;

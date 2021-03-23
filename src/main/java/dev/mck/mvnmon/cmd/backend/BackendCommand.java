@@ -11,6 +11,7 @@ import dev.mck.mvnmon.cmd.backend.pullrequester.PullRequesterMessageHandler;
 import dev.mck.mvnmon.cmd.backend.resources.ArtifactResource;
 import dev.mck.mvnmon.cmd.backend.resources.ConsumerResource;
 import dev.mck.mvnmon.cmd.backend.resources.PomResource;
+import dev.mck.mvnmon.cmd.backend.scheduler.PurgeArtifactsTask;
 import dev.mck.mvnmon.cmd.backend.scheduler.SchedulerTask;
 import dev.mck.mvnmon.cmd.backend.updater.UpdaterMessageHandler;
 import dev.mck.mvnmon.cmd.backend.webhooks.InstallationCreatedEventHandler;
@@ -49,9 +50,8 @@ public class BackendCommand extends ExtendedServerCommand<BackendConfiguration> 
     var nats = configuration.getNats().build(environment);
 
     // pull requester
-    var pullRequesterHandler = new PullRequesterMessageHandler(jdbi, pullRequesterExecutor);
     var pullRequesterDispatcher =
-        nats.createDispatcher(pullRequesterHandler)
+        nats.createDispatcher(new PullRequesterMessageHandler(jdbi, pullRequesterExecutor))
             .subscribe(Subjects.CRAWLED, "backend-pull-requester");
     environment.lifecycle().manage(new DispatcherManager(pullRequesterDispatcher));
 
@@ -115,6 +115,7 @@ public class BackendCommand extends ExtendedServerCommand<BackendConfiguration> 
 
     // tasks
     environment.admin().addTask(new SchedulerTask(configuration.getScheduler(), jdbi, nats));
+    environment.admin().addTask(new PurgeArtifactsTask(jdbi));
 
     // resources
     environment.jersey().register(new ArtifactResource(jdbi));

@@ -9,6 +9,7 @@ import de.pdark.decentxml.Document;
 import de.pdark.decentxml.Element;
 import dev.mck.mvnmon.api.maven.ArtifactUpdate;
 import dev.mck.mvnmon.api.maven.Dependency;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +72,6 @@ public enum PomFiles {
     if (propertiesElement == null) {
       return Collections.emptyMap();
     }
-    ;
     for (Element property : propertiesElement.getChildren()) {
       Attribute ignore = property.getAttribute("mvnmon");
       if (ignore != null && ignore.getValue().equals("ignore")) {
@@ -148,9 +147,10 @@ public enum PomFiles {
    * @param currentVersion
    * @param latestVersions crawled latest versions; assumed to be in descending order of upload
    *     timestamp.
-   * @return new version, if one was determined.
+   * @return new version along with the other candidates which were considered; or empty if a new
+   *     version was not determined.
    */
-  public static final Optional<String> getNewVersion(
+  public static final Optional<Pair<String, List<String>>> getNewVersion(
       String currentVersion, List<String> latestVersions) {
     if (latestVersions.isEmpty()) {
       return Optional.empty();
@@ -163,11 +163,16 @@ public enum PomFiles {
     // we (potentially) leave the current version in the mix, to prevent undesirable
     // qualifier switches, such as from org.postgresql:postgresql 42.2.19 to 42.2.19.jre7
     ComparableVersion comparableCurrentVersion = new ComparableVersion(currentVersion);
-    List<ComparableVersion> candidateVersions =
-        latestVersions.stream()
-            .map(ComparableVersion::new)
-            .filter(v -> comparableCurrentVersion.compareTo(v) <= 0)
-            .collect(Collectors.toList());
+    List<ComparableVersion> candidateVersions = new ArrayList<>(latestVersions.size());
+    for (String latestVersion : latestVersions) {
+      var version = new ComparableVersion(latestVersion);
+      if (version.compareTo(comparableCurrentVersion) >= 0) {
+        candidateVersions.add(version);
+      }
+      if (currentVersion.equals(version)) {
+        break;
+      }
+    }
     switch (candidateVersions.size()) {
       case 0:
         // this case should be covered by the equality check early-on in most cases,
@@ -175,10 +180,10 @@ public enum PomFiles {
         // we don't do downgrades!
         return Optional.empty();
       case 1:
-        return Optional.of(candidateVersions.get(0).toString());
+        return Optional.of(Pair.of(candidateVersions.get(0).toString(), Collections.emptyList()));
       default:
+        // fall through
     }
-    // fall through
     // calculate a score for each candidate that is its edit distance + its position
     // in the list (to penalize earlier upload times).
     // the winning candidate is the one with the lowest score.
@@ -203,12 +208,30 @@ public enum PomFiles {
     if (comparableCurrentVersion.equals(candidate)) {
       return Optional.empty();
     }
-    return Optional.of(candidate.toString());
+    List<String> candidates = new ArrayList<>(candidateVersions.size() - 1);
+    for (var candidateVersion : candidateVersions) {
+      String otherCandidate = candidateVersion.toString();
+      // don't include the current version, but DO include the selected candidate,
+      // its position in this list is helpful to understand why it was chosen,
+      // and/or why it might be the right choice
+      if (!otherCandidate.equals(currentVersion)) {
+        candidates.add(otherCandidate);
+      }
+    }
+    return Optional.of(Pair.of(candidate.toString(), candidates));
   }
 
+  /**
+   * @param dependencies
+   * @return a 64-bit hash/fingerprint of the dependencies. Different ordering will not result in a
+   *     different hash.
+   */
   public static long hashDependencies(Collection<Dependency> dependencies) {
     var sortedNames =
-        dependencies.stream().map(d -> d.getGroupId() + d.getArtifactId()).sorted().toList();
+        dependencies.stream()
+            .map(d -> d.getGroupId() + d.getArtifactId() + d.getVersion())
+            .sorted()
+            .toList();
     Hasher hash = Hashing.farmHashFingerprint64().newHasher();
     for (String name : sortedNames) {
       hash.putString(name, UTF_8);

@@ -1,5 +1,6 @@
 package dev.mck.mvnmon.cmd.backend.webhooks;
 
+import dev.mck.mvnmon.nats.TypedHandler;
 import static java.util.stream.Collectors.toList;
 
 import de.pdark.decentxml.Document;

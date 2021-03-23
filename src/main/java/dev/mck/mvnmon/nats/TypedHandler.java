@@ -1,4 +1,4 @@
-package dev.mck.mvnmon.cmd.backend.webhooks;
+package dev.mck.mvnmon.nats;
 
 import dev.mck.mvnmon.util.Serialization;
 import io.nats.client.Message;

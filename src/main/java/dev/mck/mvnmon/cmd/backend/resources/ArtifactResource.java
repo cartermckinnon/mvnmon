@@ -1,7 +1,9 @@
 package dev.mck.mvnmon.cmd.backend.resources;
 
 import dev.mck.mvnmon.api.maven.Artifact;
+import dev.mck.mvnmon.api.maven.ArtifactWithId;
 import dev.mck.mvnmon.sql.ArtifactDao;
+import java.util.List;
 import java.util.Optional;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -33,10 +35,10 @@ public class ArtifactResource {
 
   @Path("/artifacts")
   @GET
-  public void scan(
+  public List<ArtifactWithId> scan(
       @QueryParam("limit") @DefaultValue("10") int limit,
       @QueryParam("cursor") @DefaultValue("0") int cursor) {
     var dao = jdbi.onDemand(ArtifactDao.class);
-    dao.scan(limit, cursor);
+    return dao.scan(limit, cursor);
   }
 }

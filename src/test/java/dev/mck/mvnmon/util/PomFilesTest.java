@@ -47,13 +47,13 @@ public class PomFilesTest {
     latestVersions.add("28.1-android");
 
     var newVersion = PomFiles.getNewVersion("20.0-jre", latestVersions);
-    assertThat(newVersion).isPresent().get().isEqualTo("30.1-jre");
+    assertThat(newVersion).isPresent().get().extracting(Pair::getLeft).isEqualTo("30.1-jre");
 
     newVersion = PomFiles.getNewVersion("28.2-jre", latestVersions);
-    assertThat(newVersion).isPresent().get().isEqualTo("30.1-jre");
+    assertThat(newVersion).isPresent().get().extracting(Pair::getLeft).isEqualTo("30.1-jre");
 
     newVersion = PomFiles.getNewVersion("30.0-android", latestVersions);
-    assertThat(newVersion).isPresent().get().isEqualTo("30.1-android");
+    assertThat(newVersion).isPresent().get().extracting(Pair::getLeft).isEqualTo("30.1-android");
   }
 
   @TestFactory
@@ -68,16 +68,16 @@ public class PomFilesTest {
     latestVersions.add("42.2.18.jre6");
 
     var newVersion = PomFiles.getNewVersion("42.2.18", latestVersions);
-    assertThat(newVersion).isPresent().get().isEqualTo("42.2.19");
+    assertThat(newVersion).isPresent().get().extracting(Pair::getLeft).isEqualTo("42.2.19");
 
     newVersion = PomFiles.getNewVersion("42.2.17", latestVersions);
-    assertThat(newVersion).isPresent().get().isEqualTo("42.2.19");
+    assertThat(newVersion).isPresent().get().extracting(Pair::getLeft).isEqualTo("42.2.19");
 
     newVersion = PomFiles.getNewVersion("42.2.18.jre7", latestVersions);
-    assertThat(newVersion).isPresent().get().isEqualTo("42.2.19.jre7");
+    assertThat(newVersion).isPresent().get().extracting(Pair::getLeft).isEqualTo("42.2.19.jre7");
 
     newVersion = PomFiles.getNewVersion("42.2.18.jre6", latestVersions);
-    assertThat(newVersion).isPresent().get().isEqualTo("42.2.19.jre6");
+    assertThat(newVersion).isPresent().get().extracting(Pair::getLeft).isEqualTo("42.2.19.jre6");
 
     newVersion = PomFiles.getNewVersion("42.2.19", latestVersions);
     assertThat(newVersion).isEmpty();
@@ -95,13 +95,13 @@ public class PomFilesTest {
     latestVersions.add("5.6.2");
 
     var newVersion = PomFiles.getNewVersion("5.7.1", latestVersions);
-    assertThat(newVersion).isPresent().get().isEqualTo("5.8.0-M1");
+    assertThat(newVersion).isPresent().get().extracting(Pair::getLeft).isEqualTo("5.8.0-M1");
 
     newVersion = PomFiles.getNewVersion("5.6.2", latestVersions);
-    assertThat(newVersion).isPresent().get().isEqualTo("5.8.0-M1");
+    assertThat(newVersion).isPresent().get().extracting(Pair::getLeft).isEqualTo("5.8.0-M1");
 
     newVersion = PomFiles.getNewVersion("4.0.0", latestVersions);
-    assertThat(newVersion).isPresent().get().isEqualTo("5.8.0-M1");
+    assertThat(newVersion).isPresent().get().extracting(Pair::getLeft).isEqualTo("5.8.0-M1");
   }
 
   /*

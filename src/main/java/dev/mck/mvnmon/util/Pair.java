@@ -5,6 +5,11 @@ import java.util.Objects;
 
 /** An immutable 2-tuple. */
 public class Pair<L, R> {
+
+  public static final <L, R> Pair<L, R> of(L left, R right) {
+    return new Pair<>(left, right);
+  }
+
   private final L left;
   private final R right;
 

@@ -50,7 +50,7 @@ public class UpdateDependenciesCommand extends Command {
                         dependency.getGroupId(),
                         dependency.getArtifactId(),
                         dependency.getVersion(),
-                        newVersion));
+                        newVersion.getLeft()));
               });
     }
 

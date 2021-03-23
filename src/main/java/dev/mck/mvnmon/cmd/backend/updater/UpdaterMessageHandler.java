@@ -1,11 +1,9 @@
 package dev.mck.mvnmon.cmd.backend.updater;
 
 import dev.mck.mvnmon.api.maven.Artifact;
+import dev.mck.mvnmon.nats.TypedHandler;
 import dev.mck.mvnmon.sql.ArtifactDao;
-import dev.mck.mvnmon.util.Serialization;
 import io.dropwizard.util.Duration;
-import io.nats.client.Message;
-import io.nats.client.MessageHandler;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +16,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UpdaterMessageHandler implements MessageHandler, Closeable {
+public class UpdaterMessageHandler extends TypedHandler<Artifact> implements Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(UpdaterMessageHandler.class);
 
@@ -30,6 +28,7 @@ public class UpdaterMessageHandler implements MessageHandler, Closeable {
 
   public UpdaterMessageHandler(
       Jdbi jdbi, int batchSize, Duration batchInterval, ScheduledExecutorService executor) {
+    super(Artifact.class);
     this.jdbi = jdbi;
     this.queue = new ConcurrentLinkedQueue<>();
     this.batchSize = batchSize;
@@ -43,8 +42,7 @@ public class UpdaterMessageHandler implements MessageHandler, Closeable {
   }
 
   @Override
-  public void onMessage(Message msg) throws InterruptedException {
-    Artifact artifact = Serialization.deserialize(msg.getData(), Artifact.class);
+  protected void handlePayload(Artifact artifact) {
     queue.add(artifact);
     LOG.debug("received artifact={}", artifact);
   }

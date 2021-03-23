@@ -1,5 +1,6 @@
 package dev.mck.mvnmon.cmd.backend.webhooks;
 
+import dev.mck.mvnmon.nats.TypedHandler;
 import de.pdark.decentxml.Document;
 import dev.mck.mvnmon.api.github.Installation;
 import dev.mck.mvnmon.api.github.Repository;
