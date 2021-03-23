@@ -18,7 +18,7 @@ public class InstallationRepositoriesAddedEventHandler
   @Override
   protected Pair<Installation, String> getInstallationAndToken(
       InstallationRepositoriesAddedEvent event) {
-    var token = getJdbi().onDemand(InstallationDao.class).getToken(event.getInstallation().getId());
+    var token = getJdbi().onDemand(InstallationDao.class).getToken(event.getInstallation().id());
     if (token == null) {
       throw new IllegalStateException("failed to get installation token for event=" + event);
     }

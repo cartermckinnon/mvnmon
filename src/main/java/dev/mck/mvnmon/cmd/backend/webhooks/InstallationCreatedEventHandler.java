@@ -35,20 +35,19 @@ public class InstallationCreatedEventHandler
 
   @Override
   protected Collection<Repository> getRepositories(InstallationCreatedEvent event) {
-    return event.getRepositories();
+    return event.repositories();
   }
 
   protected Pair<Installation, String> getInstallationAndToken(InstallationCreatedEvent event)
       throws Exception {
     String jwt = createJWT(appId, privateKeyFile, 60000); // ttl of 60 seconds
     GitHub app = new GitHubBuilder().withJwtToken(jwt).build();
-    GHAppInstallation installation =
-        app.getApp().getInstallationById(event.getInstallation().getId());
+    GHAppInstallation installation = app.getApp().getInstallationById(event.installation().id());
     String token = installation.createToken().create().getToken();
     var installationDao = getJdbi().onDemand(InstallationDao.class);
     installationDao.insert(
-        event.getInstallation().getId(), event.getInstallation().getAccount().getLogin(), token);
-    return new Pair<>(event.getInstallation(), token);
+        event.installation().id(), event.installation().account().login(), token);
+    return new Pair<>(event.installation(), token);
   }
 
   private static String createJWT(String githubAppId, String privateKeyFile, long ttlMillis)

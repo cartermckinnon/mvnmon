@@ -1,8 +1,8 @@
 package dev.mck.mvnmon.cmd.backend.webhooks;
 
-import dev.mck.mvnmon.nats.TypedHandler;
 import dev.mck.mvnmon.api.github.InstallationRepositoriesRemovedEvent;
 import dev.mck.mvnmon.api.github.Repository;
+import dev.mck.mvnmon.nats.TypedHandler;
 import dev.mck.mvnmon.sql.RepositoryDao;
 import org.jdbi.v3.core.Jdbi;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ public class InstallationRepositoriesRemovedEventHandler
   protected void handlePayload(InstallationRepositoriesRemovedEvent event) {
     var dao = jdbi.onDemand(RepositoryDao.class);
     for (Repository repository : event.getRepositoriesRemoved()) {
-      dao.delete(repository.getId());
+      dao.delete(repository.id());
     }
     LOG.info(
         "removed repositories={} from installation={}",

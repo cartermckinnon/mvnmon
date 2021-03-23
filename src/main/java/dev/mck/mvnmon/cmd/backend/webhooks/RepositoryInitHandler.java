@@ -1,11 +1,11 @@
 package dev.mck.mvnmon.cmd.backend.webhooks;
 
-import dev.mck.mvnmon.nats.TypedHandler;
 import de.pdark.decentxml.Document;
 import dev.mck.mvnmon.api.github.Installation;
 import dev.mck.mvnmon.api.github.Repository;
 import dev.mck.mvnmon.api.maven.Artifact;
 import dev.mck.mvnmon.api.maven.ArtifactConsumer;
+import dev.mck.mvnmon.nats.TypedHandler;
 import dev.mck.mvnmon.sql.ArtifactConsumerDao;
 import dev.mck.mvnmon.sql.ArtifactDao;
 import dev.mck.mvnmon.sql.PomDao;
@@ -49,11 +49,10 @@ public abstract class RepositoryInitHandler<T> extends TypedHandler<T> {
       var github = GitHub.connectUsingOAuth(installation.getRight());
 
       for (Repository repository : repositories) {
-        repositoryDao.insert(
-            repository.getId(), repository.getName(), installation.getLeft().getId());
+        repositoryDao.insert(repository.id(), repository.name(), installation.getLeft().id());
 
         List<GHContent> poms =
-            github.searchContent().repo(repository.getName()).filename("pom.xml").list().toList();
+            github.searchContent().repo(repository.name()).filename("pom.xml").list().toList();
 
         for (GHContent pom : poms) {
           Document doc = XmlFiles.parse(pom.read());
@@ -66,7 +65,7 @@ public abstract class RepositoryInitHandler<T> extends TypedHandler<T> {
           artifactDao.insert(artifacts);
 
           var dependencyHash = PomFiles.hashDependencies(dependencies);
-          long pomId = pomDao.insert(repository.getId(), pom.getPath(), dependencyHash);
+          long pomId = pomDao.insert(repository.id(), pom.getPath(), dependencyHash);
 
           var consumers =
               dependencies.stream()
@@ -81,7 +80,7 @@ public abstract class RepositoryInitHandler<T> extends TypedHandler<T> {
               "inserted consumers={} pom={} repository={}",
               consumers.size(),
               pom.getPath(),
-              repository.getName());
+              repository.name());
         }
       }
     } catch (Exception e) {

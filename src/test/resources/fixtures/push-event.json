@@ -3,8 +3,7 @@
   "before": "c82bfb9d64882f799cef9baba63a162a10c5a640",
   "after": "76ff14424d89c1a788ead25ce20c0fbbff1b82bc",
   "repository": {
-    "id": 346615035,
-    "node_id": "MDEwOlJlcG9zaXRvcnkzNDY2MTUwMzU=",
+    "id": 123,
     "name": "test",
     "full_name": "mvnmon/test",
     "private": false,
@@ -12,7 +11,7 @@
       "name": "mvnmon",
       "email": "80447704+mvnmon@users.noreply.github.com",
       "login": "mvnmon",
-      "id": 80447704,
+      "id": 123,
       "node_id": "MDQ6VXNlcjgwNDQ3NzA0",
       "avatar_url": "https://avatars.githubusercontent.com/u/80447704?v=4",
       "gravatar_id": "",
@@ -106,7 +105,7 @@
   },
   "sender": {
     "login": "mvnmon",
-    "id": 80447704,
+    "id": 123,
     "node_id": "MDQ6VXNlcjgwNDQ3NzA0",
     "avatar_url": "https://avatars.githubusercontent.com/u/80447704?v=4",
     "gravatar_id": "",
@@ -147,11 +146,9 @@
         "email": "noreply@github.com",
         "username": "web-flow"
       },
-      "added": [],
-      "removed": [],
-      "modified": [
-        "pom.xml"
-      ]
+      "added": ["added/pom.xml"],
+      "removed": ["removed/pom.xml"],
+      "modified": ["modified/pom.xml"]
     }
   ],
   "head_commit": {

@@ -1,5 +1,6 @@
 package dev.mck.mvnmon.api.github;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -200,45 +201,16 @@ import java.util.Set;
  * @author carter
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PushEvent {
-
-  @JsonProperty("ref")
-  private String ref;
-
-  @JsonProperty("repository")
-  private Repository repository;
-
-  @JsonProperty("commits")
-  private List<Commit> commits;
-
-  public String getRef() {
-    return ref;
-  }
-
-  public Repository getRepository() {
-    return repository;
-  }
-
-  public List<Commit> getCommits() {
-    return commits;
-  }
-
-  public void setRef(String ref) {
-    this.ref = ref;
-  }
-
-  public void setRepository(Repository repository) {
-    this.repository = repository;
-  }
-
-  public void setCommits(List<Commit> commits) {
-    this.commits = commits;
-  }
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public record PushEvent(
+        @JsonProperty("ref") String ref,
+        @JsonProperty("repository") Repository repository,
+        @JsonProperty("commits") List<Commit> commits) {
 
   /** @return true if this push event was to the repository's default branch; false otherwise. */
   @JsonIgnore
   public boolean isToDefaultBranch() {
-    return ref.endsWith(repository.getDefaultBranch());
+    return ref.endsWith(repository.defaultBranch());
   }
 
   @JsonIgnore
@@ -267,44 +239,5 @@ public class PushEvent {
       }
     }
     return poms;
-  }
-
-  @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("ref", ref)
-        .add("repository", repository)
-        .add("commits", commits)
-        .toString();
-  }
-
-  @Override
-  public int hashCode() {
-    int hash = 3;
-    hash = 13 * hash + Objects.hashCode(this.ref);
-    hash = 13 * hash + Objects.hashCode(this.repository);
-    hash = 13 * hash + Objects.hashCode(this.commits);
-    return hash;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    final PushEvent other = (PushEvent) obj;
-    if (!Objects.equals(this.ref, other.ref)) {
-      return false;
-    }
-    if (!Objects.equals(this.repository, other.repository)) {
-      return false;
-    }
-    return Objects.equals(this.commits, other.commits);
   }
 }

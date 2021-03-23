@@ -21,8 +21,8 @@ public class InstallationDeletedEventHandler extends TypedHandler<InstallationDe
   @Override
   protected void handlePayload(InstallationDeletedEvent event) throws Exception {
     var dao = jdbi.onDemand(InstallationDao.class);
-    if (dao.delete(event.getInstallation().getId())) {
-      LOG.info("deleted installation={}", event.getInstallation());
+    if (dao.delete(event.installation().id())) {
+      LOG.info("deleted installation={}", event.installation());
     }
   }
 }
