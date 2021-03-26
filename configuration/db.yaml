@@ -1,6 +1,6 @@
 ---
 db:
   driverClass: org.postgresql.Driver
-  url: jdbc:postgresql://localhost:5432/
-  user: user
-  password: password
+  url: "jdbc:postgresql://${MVNMON_POSTGRES_SERVER:-localhost:5432}/"
+  user: "${MVNMON_POSTGRES_USER:-user}"
+  password: "${MVNMON_POSTGRES_PASSWORD:-password}"
