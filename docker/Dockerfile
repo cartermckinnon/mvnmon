@@ -19,4 +19,4 @@ WORKDIR /mvnmon
 COPY --from=builder /workdir/target/lib/ /mvnmon/lib/
 COPY --from=builder /workdir/target/mvnmon*.jar /mvnmon/mvnmon.jar
 ENTRYPOINT ["java", "--enable-preview", "-cp", "/mvnmon/lib/*:mvnmon.jar", "dev.mck.mvnmon.MvnMonApplication"]
-ADD configuration/db.yaml configuration.yaml
+ADD configuration/db.yaml /configuration.yaml
