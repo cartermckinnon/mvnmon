@@ -2,28 +2,25 @@
 
 set -ex
 
-cd $(dirname $0)
-cd ..
+echo "PWD=$PWD"
 
-# get repo and tag from image name
+cd $(dirname $0)
+cd ../..
+
 TAG_START=$(expr index "$IMAGE_NAME" :)
 REPO=${IMAGE_NAME:0:TAG_START-1}
 TAG=${IMAGE_NAME:TAG_START}
 
-# release tags look like '0.1.0', '0.1.0-backend', or '0.1.0-frontend'
-FE_BE_TAG_PATTERN='^(.+)-(backend|frontend)$'
+docker build . \
+  --file $DOCKERFILE_PATH \
+  --tag $IMAGE_NAME \
 
-# add the 'latest' tag if a release was just built
-if [[ "$TAG" =~ "$FE_BE_TAG_PATTERN" ]]
-then
-  VERSION=${BASH_REMATCH[1]}
-  SUFFIX=${BASH_REMATCH[2]}
-  docker build . \
-    --file $DOCKERFILE_PATH \
-    --tag $IMAGE_NAME \
-    --build-arg VERSION=$VERSION
-else
-  docker build . \
-    --file $DOCKERFILE_PATH \
-    --tag $IMAGE_NAME
-fi
+docker build . \
+  --file $DOCKERFILE_PATH.frontend \
+  --tag $IMAGE_NAME-frontend \
+  --build-arg VERSION=$TAG
+
+docker build . \
+  --file $DOCKERFILE_PATH.backend \
+  --tag $IMAGE_NAME-backend \
+  --build-arg VERSION=$TAG
