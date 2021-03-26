@@ -6,14 +6,20 @@ TAG_START=$(expr index "$IMAGE_NAME" :)
 REPO=${IMAGE_NAME:0:TAG_START-1}
 TAG=${IMAGE_NAME:TAG_START}
 
-docker push $REPO:$TAG $REPO:$TAG-frontend $REPO:$TAG-backend
+docker push $REPO:$TAG
+docker push $REPO:$TAG-frontend
+docker push $REPO:$TAG-backend
 
+# add 'latest' tags if a release was just built
 RELEASE_TAG_PATTERN='^[0-9.]+$'
 if [[ "$TAG" =~ $RELEASE_TAG_PATTERN ]]
 then
-    # add 'latest' tags if a release was just built
     docker tag $REPO:$TAG $REPO:latest
+    docker push $REPO:latest
+    
     docker tag $REPO:$TAG-frontend $REPO:latest-frontend
+    docker push $REPO:latest-frontend
+
     docker tag $REPO:$TAG-backend $REPO:latest-backend
-    docker push $REPO:latest $REPO:latest-frontend $REPO:latest-backend
+    docker push $REPO:latest-backend
 fi
