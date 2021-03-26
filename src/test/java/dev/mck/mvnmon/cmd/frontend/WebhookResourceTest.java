@@ -1,24 +1,17 @@
 package dev.mck.mvnmon.cmd.frontend;
 
-import dev.mck.mvnmon.cmd.frontend.WebhookResource;
-import io.dropwizard.testing.ResourceHelpers;
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import org.junit.jupiter.api.Test;
 
 public class WebhookResourceTest {
 
   @Test
   public void verifyPayload() throws Exception {
-    String secret = "mySecret";
+    byte[] secret = "mySecret".getBytes(UTF_8);
     String signatureHeader =
-        "sha256=91508dc7dcdfebe70ee32aa3bdc38b8fd45453d262508ba3bc96151dafd25f55";
-    byte[] payload =
-        Files.readAllBytes(
-            new File(ResourceHelpers.resourceFilePath("fixtures/push-event.json")).toPath());
-
-    WebhookResource.verifyPayload(
-        secret.getBytes(StandardCharsets.UTF_8), signatureHeader, payload);
+        "sha256=633e18e8c90bc8b56c127f5cd3748a43e34134d8d1113de59e8fe105fc61c8e9";
+    byte[] payload = "hello, world".getBytes(UTF_8);
+    WebhookResource.verifyPayload(secret, signatureHeader, payload);
   }
 }
