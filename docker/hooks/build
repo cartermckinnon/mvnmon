@@ -5,33 +5,20 @@ set -ex
 cd $(dirname $0)
 cd ..
 
+REPO=mckdev/mvnmon
 VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
 
 # base
-docker build . --file docker/Dockerfile --tag mckdev/mvnmon:$VERSION
+docker build . --file docker/Dockerfile --tag $REPO:$VERSION
 
 # backend
 docker build . \
   --file docker/Dockerfile.backend \
-  --tag mckdev/mvnmon:$VERSION-backend \
+  --tag $REPO:$VERSION-backend \
   --build-arg VERSION=$VERSION
 
 # frontend
 docker build . \
   --file docker/Dockerfile.frontend \
-  --tag mckdev/mvnmon:$VERSION-frontend \
+  --tag $REPO:$VERSION-frontend \
   --build-arg VERSION=$VERSION
-
-RELEASE_VERSION_PATTERN='^[0-9.]+$'
-if [[ "$VERSION" =~ $RELEASE_VERSION_PATTERN ]]
-then
-    # add the 'latest' tag if a release was just built
-    docker tag mvkdev/mvnmon:$VERSION mckdev/mvnmon:latest
-    docker tag mvkdev/mvnmon:$VERSION-backend mckdev/mvnmon:latest-backend
-    docker tag mvkdev/mvnmon:$VERSION-frontend mckdev/mvnmon:latest-frontend
-else
-    # add the 'latest-snapshot' tag if a snapshot was just built
-    docker tag mvkdev/mvnmon:$VERSION mckdev/mvnmon:latest-snapshot
-    docker tag mvkdev/mvnmon:$VERSION-backend mckdev/mvnmon:latest-snapshot-backend
-    docker tag mvkdev/mvnmon:$VERSION-frontend mckdev/mvnmon:latest-snapshot-frontend
-fi

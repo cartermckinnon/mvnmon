@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -ex
+
+cd $(dirname $0)
+cd ..
+
+REPO=mckdev/mvnmon
+VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
+
+docker push $REPO:$VERSION $REPO:$VERSION-backend $REPO:$VERSION-frontend
+
+RELEASE_VERSION_PATTERN='^[0-9.]+$'
+if [[ "$VERSION" =~ $RELEASE_VERSION_PATTERN ]]
+then
+    # add the 'latest' tag if a release was just built
+    docker tag $REPO:$VERSION $REPO:latest
+    docker tag $REPO:$VERSION-backend $REPO:latest-backend
+    docker tag $REPO:$VERSION-frontend $REPO:latest-frontend
+    docker push $REPO:latest $REPO:latest-backend $REPO:latest-frontend
+else
+    # add the 'latest-snapshot' tag if a snapshot was just built
+    docker tag $REPO:$VERSION $REPO:latest-snapshot
+    docker tag $REPO:$VERSION-backend $REPO:latest-snapshot-backend
+    docker tag $REPO:$VERSION-frontend $REPO:latest-snapshot-frontend
+    docker push $REPO:latest-snapshot $REPO:latest-snapshot-backend $REPO:latest-snapshot-frontend
+fi
