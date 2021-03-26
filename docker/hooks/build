@@ -2,23 +2,25 @@
 
 set -ex
 
+echo "PWD=$PWD"
+
 cd $(dirname $0)
-cd ..
+cd ../..
 
-REPO=mckdev/mvnmon
-VERSION=$(xmllint --xpath "//*[local-name()='project']/*[local-name()='version']/text()" pom.xml)
+TAG_START=$(expr index "$IMAGE_NAME" :)
+REPO=${IMAGE_NAME:0:TAG_START-1}
+TAG=${IMAGE_NAME:TAG_START}
 
-# base
-docker build . --file docker/Dockerfile --tag $REPO:$VERSION
-
-# backend
 docker build . \
-  --file docker/Dockerfile.backend \
-  --tag $REPO:$VERSION-backend \
-  --build-arg VERSION=$VERSION
+  --file $DOCKERFILE_PATH \
+  --tag $IMAGE_NAME \
 
-# frontend
 docker build . \
-  --file docker/Dockerfile.frontend \
-  --tag $REPO:$VERSION-frontend \
-  --build-arg VERSION=$VERSION
+  --file $DOCKERFILE_PATH.frontend \
+  --tag $IMAGE_NAME-frontend \
+  --build-arg VERSION=$TAG
+
+docker build . \
+  --file $DOCKERFILE_PATH.backend \
+  --tag $IMAGE_NAME-backend \
+  --build-arg VERSION=$TAG
