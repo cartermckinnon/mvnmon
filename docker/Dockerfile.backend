@@ -1,4 +1,4 @@
 ARG VERSION
 FROM mckdev/mvnmon:$VERSION
-CMD ["backend", "configuration.yaml"]
-ADD configuration/backend.yaml configuration.yaml
+CMD ["backend", "/configuration.yaml"]
+ADD configuration/backend.yaml /configuration.yaml
