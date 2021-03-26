@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -ex
+
+# get repo and tag from image name
+TAG_START=$(expr index "$IMAGE_NAME" :)
+REPO=${IMAGE_NAME:0:TAG_START-1}
+TAG=${IMAGE_NAME:TAG_START}
+
+# release tags look like '0.1.0', '0.1.0-backend', or '0.1.0-frontend'
+RELEASE_TAG_PATTERN='^[0-9.]+(-backend|-frontend)?$'
+
+# add the 'latest' tag if a release was just built
+if [[ "$TAG" =~ $RELEASE_TAG_PATTERN ]]
+then
+    SUFFIX=${BASH_REMATCH[1]}
+    docker tag "$IMAGE_NAME" "$REPO:latest$SUFFIX"
+    docker push "$REPO:latest$SUFFIX"
+fi
