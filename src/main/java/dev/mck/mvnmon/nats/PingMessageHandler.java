@@ -24,7 +24,7 @@ public class PingMessageHandler implements MessageHandler {
   public void onMessage(Message msg) throws InterruptedException {
     if (Arrays.equals(PING, msg.getData())) {
       nats.publish(msg.getReplyTo(), PONG);
-      LOG.info("pong -> {}", msg.getReplyTo());
+      LOG.debug("pong -> {}", msg.getReplyTo());
     }
   }
 }

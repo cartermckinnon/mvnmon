@@ -18,6 +18,7 @@ mkdir -p dist/$DIST/bin
 cp -R target/mvnmon*.jar dist/$DIST/lib/
 cp -R target/lib/* dist/$DIST/extlib/
 cp -R doc/ dist/$DIST/doc
+cp -R target/site/apidocs dist/$DIST/doc/javadoc
 cp src/main/bin/mvnmon dist/$DIST/bin/
 
 # pack (optionally)

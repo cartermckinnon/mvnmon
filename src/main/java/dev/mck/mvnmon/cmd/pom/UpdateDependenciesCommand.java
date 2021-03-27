@@ -4,8 +4,8 @@ import de.pdark.decentxml.Document;
 import dev.mck.mvnmon.api.maven.ArtifactUpdate;
 import dev.mck.mvnmon.api.maven.Dependency;
 import dev.mck.mvnmon.cmd.backend.crawler.CrawlerUtils;
-import dev.mck.mvnmon.util.PaddedStringBuilder;
 import dev.mck.mvnmon.util.PomFiles;
+import dev.mck.mvnmon.util.TableFormatter;
 import dev.mck.mvnmon.util.XmlFiles;
 import io.dropwizard.cli.Command;
 import io.dropwizard.setup.Bootstrap;
@@ -74,39 +74,14 @@ public class UpdateDependenciesCommand extends Command {
       System.out.println("Updated " + updates.size() + " dependencies");
     }
 
-    final String groupHeader = "GROUP ID";
-    final String artifactHeader = "ARTIFACT ID";
-    final String oldVersionHeader = "OLD VERSION";
-    final String newVersionHeader = "NEW VERSION";
-
-    int groupLen = groupHeader.length();
-    int artifactLen = artifactHeader.length();
-    int oldVersionLen = oldVersionHeader.length();
+    TableFormatter output = new TableFormatter();
     for (ArtifactUpdate update : updates) {
-      groupLen = Math.max(groupLen, update.getGroupId().length());
-      artifactLen = Math.max(artifactLen, update.getArtifactId().length());
-      oldVersionLen = Math.max(oldVersionLen, update.getCurrentVersion().length());
+      output
+          .add("GROUP ID", update.getGroupId())
+          .add("ARTIFACT ID", update.getArtifactId())
+          .add("OLD VERSION", update.getCurrentVersion())
+          .add("NEW VERSION", update.getNewVersion());
     }
-    groupLen += 1;
-    artifactLen += 1;
-    oldVersionLen += 1;
-    String header =
-        new PaddedStringBuilder()
-            .padWith(groupHeader, ' ', groupLen)
-            .padWith(artifactHeader, ' ', artifactLen)
-            .padWith(oldVersionHeader, ' ', oldVersionLen)
-            .append(newVersionHeader)
-            .toString();
-    System.out.println(header);
-    for (ArtifactUpdate update : updates) {
-      String line =
-          new PaddedStringBuilder()
-              .padWith(update.getGroupId(), ' ', groupLen)
-              .padWith(update.getArtifactId(), ' ', artifactLen)
-              .padWith(update.getCurrentVersion(), ' ', oldVersionLen)
-              .append(update.getNewVersion())
-              .toString();
-      System.out.println(line);
-    }
+    System.out.println(output.toString());
   }
 }

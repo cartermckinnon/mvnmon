@@ -27,7 +27,7 @@ public class PingHealthCheck extends HealthCheck {
 
   @Override
   protected Result check() throws Exception {
-    LOG.info("ping -> {}", subject);
+    LOG.debug("ping -> {}", subject);
     var reply = nats.request(subject, PING, timeout);
     if (reply == null) {
       return Result.unhealthy(
