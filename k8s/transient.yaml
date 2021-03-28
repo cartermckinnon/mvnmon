@@ -1,0 +1,238 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mvnmon-transient
+  labels:
+    name: mvnmon-transient
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secrets
+  namespace: mvnmon-transient
+type: Opaque
+data:
+  postgresUsername:
+  postgresPassword:
+  backendAppId:
+  backendPrivateKey:
+  frontendSecret:
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: mvnmon-transient
+  labels:
+    mvnmon: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      mvnmon: backend
+  template:
+    metadata:
+      labels:
+        mvnmon: backend
+    spec:
+      volumes:
+        - name: private-key
+          secret:
+            secretName: secrets
+            items:
+              - key: backendPrivateKey
+                path: private-key.der
+      containers:
+        - name: mvnmon-backend
+          image: mckdev/mvnmon:latest-snapshot-backend
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+          volumeMounts:
+            - name: private-key
+              mountPath: "/secrets/"
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /healthcheck?pretty=true
+              port: 8083
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 8082
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          env:
+            - name: MVNMON_NATS_SERVER
+              value: "nats.mvnmon-persistent:4222"
+            - name: MVNMON_POSTGRES_SERVER
+              value: "postgres.mvnmon-persistent:5432"
+            - name: MVNMON_PRIVATE_KEY_FILE
+              value: "/secrets/private-key.der"
+            - name: MVNMON_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: backendAppId
+            - name: MVNMON_POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: postgresUsername
+            - name: MVNMON_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: postgresPassword
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: mvnmon-transient
+  labels:
+    mvnmon: backend
+spec:
+  ports:
+    - port: 8082
+      protocol: TCP
+      targetPort: 8082
+      name: http
+    - port: 8083
+      protocol: TCP
+      targetPort: 8083
+      name: admin
+  selector:
+    mvnmon: backend
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: scheduler
+  namespace: mvnmon-transient
+spec:
+  schedule: "@daily"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: scheduler
+              image: curlimages/curl
+              imagePullPolicy: IfNotPresent
+              command:
+                - "curl"
+                - "-XPOST"
+                - "http://backend:8083/tasks/scheduler"
+          restartPolicy: Never
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: purge-artifacts
+  namespace: mvnmon-transient
+spec:
+  # every 6 hours, at the top of the hour
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: purge-artifacts
+              image: curlimages/curl
+              imagePullPolicy: IfNotPresent
+              command:
+                - "curl"
+                - "-XPOST"
+                - "http://backend:8083/tasks/purge-artifacts"
+          restartPolicy: Never
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: mvnmon-transient
+  labels:
+    mvnmon: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      mvnmon: frontend
+  template:
+    metadata:
+      labels:
+        mvnmon: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: mckdev/mvnmon:latest-snapshot-frontend
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthcheck?pretty=true
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          env:
+            - name: MVNMON_NATS_SERVER
+              value: "nats.mvnmon-persistent:4222"
+            - name: MVNMON_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: frontendSecret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: mvnmon-transient
+  labels:
+    mvnmon: frontend
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+      name: http
+  selector:
+    mvnmon: frontend
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend
+  namespace: mvnmon-transient
+spec:
+  rules:
+    - host: "mvnmon.mck.dev"
+      http:
+        paths:
+          - path: /webhooks
+            pathType: Exact
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80

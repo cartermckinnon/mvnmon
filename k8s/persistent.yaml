@@ -1,0 +1,147 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mvnmon-persistent
+  labels:
+    name: mvnmon-persiste
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secrets
+  namespace: mvnmon-persistent
+type: Opaque
+data:
+  postgresUsername:
+  postgresPassword:
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nats
+  namespace: mvnmon-persistent
+  labels:
+    mvnmon: nats
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      mvnmon: nats
+  template:
+    metadata:
+      labels:
+        mvnmon: nats
+    spec:
+      containers:
+        - name: nats
+          image: nats
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4222
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nats
+  namespace: mvnmon-persistent
+  labels:
+    mvnmon: nats
+spec:
+  ports:
+    - port: 4222
+      protocol: TCP
+      targetPort: 4222
+      name: http
+  selector:
+    mvnmon: nats
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: mvnmon-persistent
+  labels:
+    mvnmon: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      mvnmon: postgres
+  template:
+    metadata:
+      labels:
+        mvnmon: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: postgresUsername
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: postgresPassword
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: mvnmon-persistent
+  labels:
+    mvnmon: postgres
+spec:
+  ports:
+    - port: 5432
+      protocol: TCP
+      targetPort: 5432
+      name: http
+  selector:
+    mvnmon: postgres
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate
+  namespace: mvnmon-persistent
+spec:
+  template:
+    metadata:
+      namespace: mvnmon
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: db-migrate
+          image: mckdev/mvnmon:latest-snapshot
+          imagePullPolicy: Always
+          args:
+            - "db"
+            - "migrate"
+            - "/configuration.yaml"
+          env:
+            - name: MVNMON_POSTGRES_SERVER
+              value: "postgres:5432"
+            - name: MVNMON_POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: postgresUsername
+            - name: MVNMON_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: postgresPassword
