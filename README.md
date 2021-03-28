@@ -92,3 +92,13 @@ curl -X POST $BACKEND:$ADMIN_PORT/tasks/scheduler
 ```
 
 `ADMIN_PORT` is 8083, by default.
+
+---
+
+## FAQ
+
+**How do I tell `mvnmon` to ignore a certain dependency?**
+
+Add an XML comment within the `<dependency>` that looks like
+`<!-- mvnmon:ignore -->`. If the version is defined with a `<property>` add the
+attribute `mvnmon="ignore"`.
