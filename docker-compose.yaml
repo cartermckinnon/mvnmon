@@ -4,7 +4,7 @@
 # See scripts/convert-private-key.sh for more information.
 
 ---
-version: '3'
+version: "3"
 
 services:
   nats:
@@ -19,41 +19,62 @@ services:
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
+    healthcheck:
+      test: "pg_isready -U user"
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
-  frontend:
-    image: mckdev/mvnmon
-    build: .
+  db-migrate:
+    image: mckdev/mvnmon:latest-snapshot
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     command:
-      - "frontend"
+      - "db"
+      - "migrate"
       - "/configuration.yaml"
-    ports:
-      - "8080:8080"
-      - "8081:8081"
     depends_on:
-      - nats
       - postgres
-    volumes:
-      - ./configuration/frontend.yaml:/configuration.yaml
     environment:
-      MVNMON_NATS_SERVER: "nats:4222"
-      MVNMON_WEBHOOK_SECRET: "secret"
+      MVNMON_POSTGRES_SERVER: "postgres:5432"
 
   backend:
-    image: mckdev/mvnmon
-    build: .
-    command:
-      - "backend"
-      - "/configuration.yaml"
+    image: mckdev/mvnmon:latest-snapshot-backend
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+      args:
+        VERSION: latest-snapshot
     ports:
       - "8082:8082"
       - "8083:8083"
     depends_on:
       - nats
+      - postgres
+      - db-migrate
     volumes:
-      - ./configuration/backend.yaml:/configuration.yaml
       - ./configuration/private-key.der:/private-key.der
     environment:
       MVNMON_NATS_SERVER: "nats:4222"
       MVNMON_POSTGRES_SERVER: "postgres:5432"
       MVNMON_PRIVATE_KEY_FILE: "/private-key.der"
       MVNMON_APP_ID: "123456"
+
+  frontend:
+    image: mckdev/mvnmon:latest-snapshot-frontend
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+      args:
+        VERSION: latest-snapshot
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      - nats
+      - backend
+    environment:
+      MVNMON_NATS_SERVER: "nats:4222"
+      MVNMON_WEBHOOK_SECRET: "secret"
