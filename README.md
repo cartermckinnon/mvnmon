@@ -3,6 +3,8 @@
 `mvnmon` (Maven monitor) is a GitHub App that will monitor `pom.xml` files in
 your repositories, and open pull requests to update their `<dependencies>`.
 
+---
+
 ### Purpose
 
 `mvnmon` is intended to make the routine maintenance of bumping dependency
@@ -11,6 +13,8 @@ the responsibility of the user to verify that the changes do not break the
 stability of the build. Many existing CI integrations can address this; and
 auto-merge when the pull request succeeds can be accomplished with other
 softwares.
+
+---
 
 ### Pre-requisites
 
@@ -25,6 +29,8 @@ At compile time:
 - Docker
 - Maven
 
+---
+
 ### Build
 
 ```sh
@@ -38,6 +44,8 @@ scripts/dist.sh
 ```
 
 `MVNMON_HOME` below is the root of the distribution (`dist/mvnmon-$VERSION/`).
+
+---
 
 ### Usage
 
