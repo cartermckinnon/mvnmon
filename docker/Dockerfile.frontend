@@ -1,4 +1,10 @@
 ARG VERSION
 FROM mckdev/mvnmon:$VERSION
 CMD ["frontend", "/configuration.yaml"]
+HEALTHCHECK \
+    --interval=30s \
+    --timeout=5s \
+    --start-period=5s \
+    --retries=3 \
+    CMD curl --fail --silent --show-error localhost:${MVNMON_ADMIN_PORT:-8081}/healthcheck || exit 1
 ADD configuration/frontend.yaml /configuration.yaml

@@ -16,7 +16,8 @@ RUN mvn package -DskipTests -q
 
 FROM adoptopenjdk/openjdk16:jre
 WORKDIR /mvnmon
-COPY --from=builder /workdir/target/lib/ /mvnmon/lib/
-COPY --from=builder /workdir/target/mvnmon*.jar /mvnmon/mvnmon.jar
-ENTRYPOINT ["java", "--enable-preview", "-cp", "/mvnmon/lib/*:mvnmon.jar", "dev.mck.mvnmon.MvnMonApplication"]
+COPY --from=builder /workdir/target/lib/ /mvnmon/extlib/
+COPY --from=builder /workdir/target/mvnmon*.jar /mvnmon/lib/mvnmon.jar
+COPY --from=builder /workdir/src/main/bin/mvnmon /mvnmon/bin/mvnmon
+ENTRYPOINT ["/mvnmon/bin/mvnmon"]
 ADD configuration/db.yaml /configuration.yaml

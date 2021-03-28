@@ -14,7 +14,6 @@ import dev.mck.mvnmon.sql.RepositoryDao;
 import dev.mck.mvnmon.util.PomFiles;
 import dev.mck.mvnmon.util.XmlFiles;
 import java.io.IOException;
-import java.util.Set;
 import org.jdbi.v3.core.Jdbi;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
@@ -40,7 +39,10 @@ public class PushEventHandler extends TypedHandler<PushEvent> {
     if (!event.isToDefaultBranch()) {
       return;
     }
-
+    var poms = event.getPomPaths();
+    if (poms.isEmpty()) {
+      return;
+    }
     var repositoryDao = jdbi.onDemand(RepositoryDao.class);
     String token = repositoryDao.getToken(event.repository().id());
     GitHub github = GitHub.connectUsingOAuth(token);
@@ -50,7 +52,6 @@ public class PushEventHandler extends TypedHandler<PushEvent> {
     } catch (IOException e) {
       throw new IllegalStateException("failed to get repository for push=" + event, e);
     }
-    Set<String> poms = event.getPomPaths();
     for (String pom : poms) {
       Document doc;
       try {

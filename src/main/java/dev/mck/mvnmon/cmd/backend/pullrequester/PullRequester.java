@@ -121,6 +121,9 @@ public class PullRequester implements Runnable {
       if(versions.isEmpty()) {
           return "";
       }
+      if(versions.size() == 1 && versions.get(0).equals(selectedVersion)) {
+          return "";
+      }
       StringBuilder s = new StringBuilder("\nI don't always get it right; ");
       if(versions.size() == 1) {
           s.append("here's another option");
