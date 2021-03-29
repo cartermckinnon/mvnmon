@@ -31,7 +31,6 @@ public enum Strings {
     return -1;
   }
 
-
   private static final char[] CHARS = "abcdefghijklmnopqrstuvwxyz".toCharArray();
   private static final Random RANDOM = new Random();
 

@@ -1,19 +1,22 @@
 package dev.mck.mvnmon.nats;
 
-import java.time.Duration;
 import static org.assertj.core.api.Assertions.*;
+
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 
 public class PingHealthCheckTest extends NatsTest {
-    @Test
-    public void oneClient() {
-        String subject = "one-client-ping-test";
-        getConnection().createDispatcher(msg -> getConnection().publish(msg.getReplyTo(), NatsConstants.PONG)).subscribe(subject);
+  @Test
+  public void oneClient() {
+    String subject = "one-client-ping-test";
+    getConnection()
+        .createDispatcher(msg -> getConnection().publish(msg.getReplyTo(), NatsConstants.PONG))
+        .subscribe(subject);
 
-        var hc = new PingHealthCheck(subject, Duration.ofSeconds(10), getConnection());
+    var hc = new PingHealthCheck(subject, Duration.ofSeconds(10), getConnection());
 
-        var result = hc.execute();
+    var result = hc.execute();
 
-        assertThat(result.isHealthy()).isTrue();
-    }
+    assertThat(result.isHealthy()).isTrue();
+  }
 }
