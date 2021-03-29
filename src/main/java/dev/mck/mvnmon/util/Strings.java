@@ -1,5 +1,7 @@
 package dev.mck.mvnmon.util;
 
+import java.util.Random;
+
 /** Utilities for Strings. */
 public enum Strings {
   INSTANCE;
@@ -27,5 +29,21 @@ public enum Strings {
       }
     }
     return -1;
+  }
+
+
+  private static final char[] CHARS = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+  private static final Random RANDOM = new Random();
+
+  /**
+   * @param length
+   * @return random string of the specified length, made of the characters {@code a-z}.
+   */
+  public static final String random(int length) {
+    StringBuilder sb = new StringBuilder(length);
+    for (int i = 0; i < length; i++) {
+      sb.append(CHARS[RANDOM.nextInt(CHARS.length)]);
+    }
+    return sb.toString();
   }
 }

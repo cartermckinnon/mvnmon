@@ -5,11 +5,20 @@ import static dev.mck.mvnmon.nats.NatsConstants.PONG;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.codahale.metrics.health.HealthCheck;
+
 import io.nats.client.Connection;
+import io.nats.client.Message;
+
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.mck.mvnmon.util.Strings;
 
 public class PingHealthCheck extends HealthCheck {
 
@@ -19,16 +28,27 @@ public class PingHealthCheck extends HealthCheck {
   private final Duration timeout;
   private final Connection nats;
 
+  private final String replyTo = "ping-reply-" + Strings.random(8);
+  private final BlockingQueue<Message> replies = new LinkedBlockingQueue<>();
+
   public PingHealthCheck(String subject, Duration timeout, Connection nats) {
     this.subject = subject;
     this.timeout = timeout;
     this.nats = nats;
+
+    nats.createDispatcher(replies::add).subscribe(replyTo);
+  }
+ 
+  public String getReplyTo() {
+    return replyTo;
   }
 
   @Override
   protected Result check() throws Exception {
     LOG.debug("ping -> {}", subject);
-    var reply = nats.request(subject, PING, timeout);
+        replies.clear();
+    nats.publish(subject, replyTo, PING);
+    var reply = replies.poll(timeout.toMillis(), TimeUnit.MILLISECONDS);
     if (reply == null) {
       return Result.unhealthy(
           "no subscribers replied within " + timeout.toSeconds() + " second(s)");
