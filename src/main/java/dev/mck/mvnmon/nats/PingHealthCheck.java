@@ -24,14 +24,15 @@ public class PingHealthCheck extends HealthCheck {
   private final Duration timeout;
   private final Connection nats;
 
-  private final String replyTo = "ping-reply-" + Strings.random(8);
-  private final BlockingQueue<Message> replies = new LinkedBlockingQueue<>();
+  private final String replyTo;
+  private final BlockingQueue<Message> replies;
 
   public PingHealthCheck(String subject, Duration timeout, Connection nats) {
     this.subject = subject;
     this.timeout = timeout;
     this.nats = nats;
-
+    replyTo = Strings.random(8);
+    replies = new LinkedBlockingQueue<>();
     nats.createDispatcher(replies::add).subscribe(replyTo);
   }
 
