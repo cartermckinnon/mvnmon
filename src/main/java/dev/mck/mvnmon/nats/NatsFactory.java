@@ -3,8 +3,9 @@ package dev.mck.mvnmon.nats;
 import com.google.common.base.MoreObjects;
 import com.google.common.net.HostAndPort;
 import io.dropwizard.setup.Environment;
-import io.nats.client.Connection;
-import io.nats.client.Nats;
+import io.nats.streaming.Options;
+import io.nats.streaming.StreamingConnection;
+import io.nats.streaming.StreamingConnectionFactory;
 import java.util.Collections;
 import java.util.Set;
 
@@ -23,15 +24,23 @@ public class NatsFactory {
     return res.toString();
   }
 
-  public Connection build() throws Exception {
-    return Nats.connect(concatenateServers());
+  public StreamingConnection build(String clientId) throws Exception {
+    var options =
+        new Options.Builder()
+            .clusterId("mvnmon")
+            .clientId(clientId)
+            .natsUrl(concatenateServers())
+            .build();
+    var factory = new StreamingConnectionFactory();
+    factory.setOptions(options);
+    return factory.createConnection();
   }
 
-  public Connection build(Environment e) throws Exception {
-    var nats = build();
-    e.lifecycle().manage(new NatsManager(nats));
-    e.healthChecks().register("nats", new NatsHealthCheck(nats));
-    return nats;
+  public StreamingConnection build(String clientId, Environment e) throws Exception {
+    var streamingConn = build(clientId);
+    e.lifecycle().manage(new StreamingConnectionManager(streamingConn));
+    e.healthChecks().register("nats", new ConnectionHealthCheck(streamingConn.getNatsConnection()));
+    return streamingConn;
   }
 
   public Set<HostAndPort> getServers() {

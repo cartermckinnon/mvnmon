@@ -5,7 +5,7 @@ import dev.mck.mvnmon.nats.Subjects;
 import dev.mck.mvnmon.sql.ArtifactDao;
 import dev.mck.mvnmon.util.Serialization;
 import io.dropwizard.servlets.tasks.Task;
-import io.nats.client.Connection;
+import io.nats.streaming.StreamingConnection;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +15,9 @@ public class SchedulerTask extends Task {
 
   private final SchedulerConfiguration configuration;
   private final Jdbi jdbi;
-  private final Connection nats;
+  private final StreamingConnection nats;
 
-  public SchedulerTask(SchedulerConfiguration configuration, Jdbi jdbi, Connection nats) {
+  public SchedulerTask(SchedulerConfiguration configuration, Jdbi jdbi, StreamingConnection nats) {
     super("scheduler");
     this.configuration = configuration;
     this.jdbi = jdbi;

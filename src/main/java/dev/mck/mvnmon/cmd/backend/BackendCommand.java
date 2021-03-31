@@ -19,11 +19,11 @@ import dev.mck.mvnmon.cmd.backend.webhooks.InstallationDeletedEventHandler;
 import dev.mck.mvnmon.cmd.backend.webhooks.InstallationRepositoriesAddedEventHandler;
 import dev.mck.mvnmon.cmd.backend.webhooks.InstallationRepositoriesRemovedEventHandler;
 import dev.mck.mvnmon.cmd.backend.webhooks.PushEventHandler;
-import dev.mck.mvnmon.nats.DispatcherManager;
-import dev.mck.mvnmon.nats.PingMessageHandler;
 import dev.mck.mvnmon.nats.Subjects;
+import dev.mck.mvnmon.nats.SubscriptionManager;
 import dev.mck.mvnmon.util.CloseableManager;
 import io.dropwizard.setup.Environment;
+import io.nats.streaming.SubscriptionOptions;
 
 public class BackendCommand extends ExtendedServerCommand<BackendConfiguration> {
 
@@ -47,13 +47,19 @@ public class BackendCommand extends ExtendedServerCommand<BackendConfiguration> 
     // so that it is shut down *after* the client is drained.
     var crawlerExecutor = environment.lifecycle().executorService("crawler-%d").build();
 
-    var nats = configuration.getNats().build(environment);
+    var nats = configuration.getNats().build("backend", environment);
 
     // pull requester
-    var pullRequesterDispatcher =
-        nats.createDispatcher(new PullRequesterMessageHandler(jdbi, pullRequesterExecutor))
-            .subscribe(Subjects.CRAWLED, "backend-pull-requester");
-    environment.lifecycle().manage(new DispatcherManager(pullRequesterDispatcher));
+    var pullRequesterSubscription =
+        nats.subscribe(
+            Subjects.CRAWLED,
+            "backend",
+            new PullRequesterMessageHandler(jdbi, pullRequesterExecutor),
+            new SubscriptionOptions.Builder()
+                .durableName("pull-requester")
+                .startWithLastReceived()
+                .build());
+    environment.lifecycle().manage(new SubscriptionManager(pullRequesterSubscription));
 
     // updater
     var updaterHandler =
@@ -63,9 +69,16 @@ public class BackendCommand extends ExtendedServerCommand<BackendConfiguration> 
             configuration.getUpdater().getInterval(),
             updaterExecutor);
     environment.lifecycle().manage(new CloseableManager(updaterHandler));
-    var updaterDispatcher = nats.createDispatcher(updaterHandler);
-    updaterDispatcher.subscribe(Subjects.CRAWLED, "backend-updater");
-    environment.lifecycle().manage(new DispatcherManager(updaterDispatcher));
+    var updaterSubscription =
+        nats.subscribe(
+            Subjects.CRAWLED,
+            "backend",
+            updaterHandler,
+            new SubscriptionOptions.Builder()
+                .durableName("updater")
+                .startWithLastReceived()
+                .build());
+    environment.lifecycle().manage(new SubscriptionManager(updaterSubscription));
 
     // crawler
     var httpClient = asyncHttpClient();
@@ -73,45 +86,75 @@ public class BackendCommand extends ExtendedServerCommand<BackendConfiguration> 
     var crawlerResponseListenerFactory =
         new CrawlerResponseListenerFactory(
             crawlerExecutor, nats, configuration.getCrawler().getMaxConcurrentRequests());
-    var crawlerDispatcher =
-        nats.createDispatcher(new CrawlerMessageHandler(httpClient, crawlerResponseListenerFactory))
-            .subscribe(Subjects.SCHEDULED, "backend");
-    environment.lifecycle().manage(new DispatcherManager(crawlerDispatcher));
+    var crawlerSubscription =
+        nats.subscribe(
+            Subjects.SCHEDULED,
+            "backend",
+            new CrawlerMessageHandler(httpClient, crawlerResponseListenerFactory),
+            new SubscriptionOptions.Builder()
+                .durableName("crawler")
+                .startWithLastReceived()
+                .build());
+    environment.lifecycle().manage(new SubscriptionManager(crawlerSubscription));
 
     // webhook handlers
     //  - push
-    var pushWebhookDispatcher =
-        nats.createDispatcher(new PushEventHandler(jdbi))
-            .subscribe(Subjects.hook("push"), "backend");
-    environment.lifecycle().manage(new DispatcherManager(pushWebhookDispatcher));
+    var pushWebhookSubscription =
+        nats.subscribe(
+            Subjects.hook("push"),
+            "backend",
+            new PushEventHandler(jdbi),
+            new SubscriptionOptions.Builder()
+                .durableName("push-webhook-handler")
+                .startWithLastReceived()
+                .build());
+    environment.lifecycle().manage(new SubscriptionManager(pushWebhookSubscription));
     // - installation created
-    var installationCreatedDispatcher =
-        nats.createDispatcher(
-                new InstallationCreatedEventHandler(
-                    jdbi, configuration.getPrivateKeyFile(), configuration.getAppId()))
-            .subscribe(Subjects.hook("installation", "created"), "backend");
-    environment.lifecycle().manage(new DispatcherManager(installationCreatedDispatcher));
+    var installationCreatedSubscription =
+        nats.subscribe(
+            Subjects.hook("installation", "created"),
+            "backend",
+            new InstallationCreatedEventHandler(
+                jdbi, configuration.getPrivateKeyFile(), configuration.getAppId()),
+            new SubscriptionOptions.Builder()
+                .durableName("installation-created-webhook-handler")
+                .startWithLastReceived()
+                .build());
+    environment.lifecycle().manage(new SubscriptionManager(installationCreatedSubscription));
     // - installation deleted
-    var installationDeletedDispatcher =
-        nats.createDispatcher(new InstallationDeletedEventHandler(jdbi))
-            .subscribe(Subjects.hook("installation", "deleted"), "backend");
-    environment.lifecycle().manage(new DispatcherManager(installationDeletedDispatcher));
+    var installationDeletedSubscription =
+        nats.subscribe(
+            Subjects.hook("installation", "deleted"),
+            "backend",
+            new InstallationDeletedEventHandler(jdbi),
+            new SubscriptionOptions.Builder()
+                .durableName("installation-deleted-webhook-handler")
+                .startWithLastReceived()
+                .build());
+    environment.lifecycle().manage(new SubscriptionManager(installationDeletedSubscription));
     // - installation repositories added
-    var repositoriesAddedDispatcher =
-        nats.createDispatcher(new InstallationRepositoriesAddedEventHandler(jdbi))
-            .subscribe(Subjects.hook("installation_repositories", "added"), "backend");
-    environment.lifecycle().manage(new DispatcherManager(repositoriesAddedDispatcher));
+    var repositoriesAddedSubscription =
+        nats.subscribe(
+            Subjects.hook("installation_repositories", "added"),
+            "backend",
+            new InstallationRepositoriesAddedEventHandler(jdbi),
+            new SubscriptionOptions.Builder()
+                .durableName("installation-repositories-added-webhook-handler")
+                .startWithLastReceived()
+                .build());
+    environment.lifecycle().manage(new SubscriptionManager(repositoriesAddedSubscription));
     // - installation repositories removed
-    var repositoriesRemovedDispatcher =
-        nats.createDispatcher(new InstallationRepositoriesRemovedEventHandler(jdbi))
-            .subscribe(Subjects.hook("installation_repositories", "removed"), "backend");
-    environment.lifecycle().manage(new DispatcherManager(repositoriesRemovedDispatcher));
+    var repositoriesRemovedSubscription =
+        nats.subscribe(
+            Subjects.hook("installation_repositories", "removed"),
+            "backend",
+            new InstallationRepositoriesRemovedEventHandler(jdbi),
+            new SubscriptionOptions.Builder()
+                .durableName("installation-repositories-removed-webhook-handler")
+                .startWithLastReceived()
+                .build());
+    environment.lifecycle().manage(new SubscriptionManager(repositoriesRemovedSubscription));
     // end webhook handlers
-
-    // ping
-    var pingDispatcher =
-        nats.createDispatcher(new PingMessageHandler(nats)).subscribe(Subjects.BACKEND_PING);
-    environment.lifecycle().manage(new DispatcherManager(pingDispatcher));
 
     // tasks
     environment.admin().addTask(new SchedulerTask(configuration.getScheduler(), jdbi, nats));

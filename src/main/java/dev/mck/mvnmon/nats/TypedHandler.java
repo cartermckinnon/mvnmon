@@ -1,8 +1,8 @@
 package dev.mck.mvnmon.nats;
 
 import dev.mck.mvnmon.util.Serialization;
-import io.nats.client.Message;
-import io.nats.client.MessageHandler;
+import io.nats.streaming.Message;
+import io.nats.streaming.MessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,7 @@ public abstract class TypedHandler<T> implements MessageHandler {
   }
 
   @Override
-  public final void onMessage(Message msg) throws InterruptedException {
+  public final void onMessage(Message msg) {
     T payload = Serialization.deserialize(msg.getData(), payloadClass);
     try {
       handlePayload(payload);

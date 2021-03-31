@@ -5,6 +5,7 @@ import com.google.common.hash.Hashing;
 import com.jayway.jsonpath.JsonPath;
 import dev.mck.mvnmon.nats.Subjects;
 import io.nats.client.Connection;
+import io.nats.streaming.StreamingConnection;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -21,10 +22,10 @@ public class WebhookResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(WebhookResource.class);
 
-  private final Connection nats;
+  private final StreamingConnection nats;
   private final byte[] secret;
 
-  public WebhookResource(String secret, Connection nats) {
+  public WebhookResource(String secret, StreamingConnection nats) {
     this.nats = nats;
     this.secret = secret == null ? null : secret.getBytes(StandardCharsets.UTF_8);
   }
@@ -42,7 +43,7 @@ public class WebhookResource {
       @HeaderParam("X-Hub-Signature-256") String signatureHeader,
       @NotNull @HeaderParam("X-GitHub-Delivery") String guid,
       @NotNull @HeaderParam("X-GitHub-Event") String event,
-      @NotNull byte[] payload) {
+      @NotNull byte[] payload) throws Exception {
     LOG.info("guid={}, event={}", guid, event);
     verifyPayload(secret, signatureHeader, payload);
     String subject = switch (event) {

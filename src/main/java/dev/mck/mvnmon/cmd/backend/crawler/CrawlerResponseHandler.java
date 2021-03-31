@@ -3,7 +3,7 @@ package dev.mck.mvnmon.cmd.backend.crawler;
 import dev.mck.mvnmon.api.maven.Artifact;
 import dev.mck.mvnmon.nats.Subjects;
 import dev.mck.mvnmon.util.Serialization;
-import io.nats.client.Connection;
+import io.nats.streaming.StreamingConnection;
 import java.util.List;
 import java.util.function.BiFunction;
 import org.asynchttpclient.Response;
@@ -19,10 +19,10 @@ public class CrawlerResponseHandler implements BiFunction<Response, Throwable, V
   private static final Logger LOG = LoggerFactory.getLogger(CrawlerResponseHandler.class);
 
   private final Artifact mavenArtifact;
-  private final Connection nats;
+  private final StreamingConnection nats;
   private Runnable callback = null;
 
-  public CrawlerResponseHandler(Artifact mavenArtifact, Connection nats) {
+  public CrawlerResponseHandler(Artifact mavenArtifact, StreamingConnection nats) {
     this.mavenArtifact = mavenArtifact;
     this.nats = nats;
   }
@@ -44,6 +44,8 @@ public class CrawlerResponseHandler implements BiFunction<Response, Throwable, V
           nats.publish(Subjects.CRAWLED, Serialization.serializeAsBytes(updatedArtifact));
         }
       }
+    } catch (Exception e) {
+      LOG.error("failed to handle crawl response for artifact=" + mavenArtifact, e);
     } finally {
       if (callback != null) {
         callback.run();

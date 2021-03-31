@@ -1,18 +1,19 @@
 package dev.mck.mvnmon.cmd.backend.crawler;
 
-import io.nats.client.Connection;
+import dev.mck.mvnmon.api.maven.Artifact;
+import io.nats.streaming.StreamingConnection;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
-import dev.mck.mvnmon.api.maven.Artifact;
 
 /** Builds CrawlResponseListeners and enforces a maximum on the number of concurrent requests. */
 public class CrawlerResponseListenerFactory {
 
   private final Executor exec;
-  private final Connection nats;
+  private final StreamingConnection nats;
   private final Semaphore requestsInFlight;
 
-  public CrawlerResponseListenerFactory(Executor exec, Connection nats, int maxConcurrentRequests) {
+  public CrawlerResponseListenerFactory(
+      Executor exec, StreamingConnection nats, int maxConcurrentRequests) {
     this.exec = exec;
     this.nats = nats;
     this.requestsInFlight = new Semaphore(maxConcurrentRequests);

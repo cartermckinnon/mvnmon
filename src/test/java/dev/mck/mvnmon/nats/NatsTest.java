@@ -18,7 +18,7 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 public abstract class NatsTest {
   // 'latest' is a scratch image, we need basic linux tools to Wait#forListeningPort
-  private static final DockerImageName IMAGE = DockerImageName.parse("nats:alpine");
+  private static final DockerImageName IMAGE = DockerImageName.parse("nats-streaming:alpine");
 
   @Container
   public GenericContainer nats =
