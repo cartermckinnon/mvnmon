@@ -24,7 +24,8 @@ public interface PomDao {
   public boolean delete(@Bind("repositoryId") long repositoryId, @Bind("path") String path);
 
   @SqlUpdate(
-      "DELETE FROM poms WHERE repository_id = :repositoryId AND path = :path AND dependency_hash != :dependencyHash")
+      "DELETE FROM poms WHERE repository_id = :repositoryId AND path = :path AND dependency_hash"
+          + " != :dependencyHash")
   public boolean deleteIfHashDiffers(
       @Bind("repositoryId") long repositoryId,
       @Bind("path") String path,

@@ -4,7 +4,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.jayway.jsonpath.JsonPath;
 import dev.mck.mvnmon.nats.Subjects;
-import io.nats.client.Connection;
 import io.nats.streaming.StreamingConnection;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -34,25 +33,28 @@ public class WebhookResource {
    * Forwards (valid) webhook events to NATS.
    *
    * @param signatureHeader
-     * @param guid
+   * @param guid
    * @param payload
-     * @param event
+   * @param event
    */
   @POST
   public void receive(
       @HeaderParam("X-Hub-Signature-256") String signatureHeader,
       @NotNull @HeaderParam("X-GitHub-Delivery") String guid,
       @NotNull @HeaderParam("X-GitHub-Event") String event,
-      @NotNull byte[] payload) throws Exception {
+      @NotNull byte[] payload)
+      throws Exception {
     LOG.info("guid={}, event={}", guid, event);
     verifyPayload(secret, signatureHeader, payload);
-    String subject = switch (event) {
-      case "push" -> Subjects.hook(event);
-      case "installation", "installation_repositories" -> Subjects.hook(event, getActionFromPayload(payload));
-      default -> null;
-    };
-    if(subject != null) {
-        nats.publish(subject, payload);
+    String subject =
+        switch (event) {
+          case "push" -> Subjects.hook(event);
+          case "installation", "installation_repositories" -> Subjects.hook(
+              event, getActionFromPayload(payload));
+          default -> null;
+        };
+    if (subject != null) {
+      nats.publish(subject, payload);
     }
   }
 

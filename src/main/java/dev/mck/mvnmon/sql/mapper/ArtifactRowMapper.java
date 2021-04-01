@@ -1,9 +1,9 @@
 package dev.mck.mvnmon.sql.mapper;
 
+import dev.mck.mvnmon.api.maven.Artifact;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import dev.mck.mvnmon.api.maven.Artifact;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 

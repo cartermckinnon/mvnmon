@@ -1,6 +1,5 @@
 package dev.mck.mvnmon.util;
 
-import dev.mck.mvnmon.util.Strings;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assert.assertThrows;
 

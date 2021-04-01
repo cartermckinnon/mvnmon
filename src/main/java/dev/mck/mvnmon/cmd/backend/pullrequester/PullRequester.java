@@ -29,7 +29,12 @@ public class PullRequester implements Runnable {
   private final Jdbi jdbi;
   private final List<String> versionCandidates;
 
-  public PullRequester(Jdbi jdbi, Pom pom, ArtifactConsumer consumer, String newVersion, List<String> versionCandidates) {
+  public PullRequester(
+      Jdbi jdbi,
+      Pom pom,
+      ArtifactConsumer consumer,
+      String newVersion,
+      List<String> versionCandidates) {
     this.jdbi = jdbi;
     this.pom = pom;
     this.consumer = consumer;
@@ -80,7 +85,10 @@ public class PullRequester implements Runnable {
     String branch = branch(consumer);
     repository.createRef("refs/heads/" + branch, commit.getSHA1());
     repository.createPullRequest(
-        title, branch, repository.getDefaultBranch(), body(consumer, newVersion, versionCandidates));
+        title,
+        branch,
+        repository.getDefaultBranch(),
+        body(consumer, newVersion, versionCandidates));
     LOG.info("created pull request for consumer={} newVersion={}", consumer, newVersion);
   }
 
@@ -103,42 +111,42 @@ public class PullRequester implements Runnable {
   private static final String BODY_FORMAT =
       """
       I determined that `%s:%s` could be updated from `%s` to `%s`.
-            
+
       :warning: **Please ensure that this change does not break your build before merging!** :warning:
       """;
 
-  protected static final String body(ArtifactConsumer consumer, String newVersion, List<String> candidateVersions) {
-    String preamble = String.format(
-        BODY_FORMAT,
-        consumer.getGroupId(),
-        consumer.getArtifactId(),
-        consumer.getCurrentVersion(),
-        newVersion);
+  protected static final String body(
+      ArtifactConsumer consumer, String newVersion, List<String> candidateVersions) {
+    String preamble =
+        String.format(
+            BODY_FORMAT,
+            consumer.getGroupId(),
+            consumer.getArtifactId(),
+            consumer.getCurrentVersion(),
+            newVersion);
     return preamble + otherOptions(newVersion, candidateVersions);
   }
-  
+
   protected static final String otherOptions(String selectedVersion, List<String> versions) {
-      if(versions.isEmpty()) {
-          return "";
+    if (versions.isEmpty()) {
+      return "";
+    }
+    if (versions.size() == 1 && versions.get(0).equals(selectedVersion)) {
+      return "";
+    }
+    StringBuilder s = new StringBuilder("\nI don't always get it right; ");
+    if (versions.size() == 1) {
+      s.append("here's another option");
+    } else {
+      s.append("here are some other options");
+    }
+    s.append(":");
+    for (String version : versions) {
+      s.append("\n- `").append(version).append('`');
+      if (version.equals(selectedVersion)) {
+        s.append(" *(selected)*");
       }
-      if(versions.size() == 1 && versions.get(0).equals(selectedVersion)) {
-          return "";
-      }
-      StringBuilder s = new StringBuilder("\nI don't always get it right; ");
-      if(versions.size() == 1) {
-          s.append("here's another option");
-      } else {
-          s.append("here are some other options");
-      }
-      s.append(":");      
-      for(String version : versions) {
-          s.append("\n- `")
-                  .append(version)
-                  .append('`');
-          if(version.equals(selectedVersion)) {
-              s.append(" *(selected)*");
-          }
-      }
-      return s.toString();
+    }
+    return s.toString();
   }
 }

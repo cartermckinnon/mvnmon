@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.MoreObjects;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -203,9 +201,9 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public record PushEvent(
-        @JsonProperty("ref") String ref,
-        @JsonProperty("repository") Repository repository,
-        @JsonProperty("commits") List<Commit> commits) {
+    @JsonProperty("ref") String ref,
+    @JsonProperty("repository") Repository repository,
+    @JsonProperty("commits") List<Commit> commits) {
 
   /** @return true if this push event was to the repository's default branch; false otherwise. */
   @JsonIgnore

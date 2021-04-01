@@ -79,7 +79,9 @@ public class ArtifactDaoTest extends DaoTest {
     getJdbi().onDemand(InstallationDao.class).insert(0, "login", "token");
     getJdbi().onDemand(RepositoryDao.class).insert(0, "name", 0);
     long pomId = getJdbi().onDemand(PomDao.class).insert(0, "path", 0);
-    getJdbi().onDemand(ArtifactConsumerDao.class).upsert(pomId, "groupIdA", "artifactIdA", "version");
+    getJdbi()
+        .onDemand(ArtifactConsumerDao.class)
+        .upsert(pomId, "groupIdA", "artifactIdA", "version");
 
     // B should be deleted because it had no consumers
     assertThat(dao.deleteArtifactsWithoutConsumers()).isEqualTo(1);

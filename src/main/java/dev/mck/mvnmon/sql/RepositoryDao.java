@@ -22,6 +22,7 @@ public interface RepositoryDao {
    * @return installation access token.
    */
   @SqlQuery(
-      "SELECT token FROM installations WHERE id IN (SELECT installation_id FROM repositories WHERE id = :id)")
+      "SELECT token FROM installations WHERE id IN (SELECT installation_id FROM repositories WHERE"
+          + " id = :id)")
   public String getToken(@Bind("id") long id);
 }

@@ -8,5 +8,5 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public record InstallationCreatedEvent(
-        @JsonProperty("repositories") List<Repository> repositories,
-        @JsonProperty("installation") Installation installation) {}
+    @JsonProperty("repositories") List<Repository> repositories,
+    @JsonProperty("installation") Installation installation) {}
