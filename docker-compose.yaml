@@ -8,9 +8,18 @@ version: "3"
 
 services:
   nats:
-    image: nats
+    image: nats-streaming
+    command:
+      - "--store"
+      - "file"
+      - "--dir"
+      - "/data"
+      - "--cluster_id"
+      - "mvnmon"
     ports:
       - "4222:4222"
+    volumes:
+      - ./docker-compose-data/nats/:/data/
 
   postgres:
     image: postgres
@@ -19,6 +28,9 @@ services:
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
+      PG_DATA: /data
+    volumes:
+      - ./docker-compose-data/postgres/:/data/
     healthcheck:
       test: "pg_isready -U user"
       interval: 10s
